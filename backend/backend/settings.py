@@ -78,12 +78,12 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres.zxpiiumpnbhqgjuglnkh",
-        "PASSWORD": "hkt8Anw0PcWvLurT",
-        "HOST": "aws-0-eu-west-1.pooler.supabase.com",
-        "PORT": "5432",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "railway",
+        "USER": "root",
+        "PASSWORD": "SjTViSMZZsuZWthrWRGMyarrzowfajaE",
+        "HOST": "tramway.proxy.rlwy.net",
+        "PORT": "44097",
     }
 }
 
