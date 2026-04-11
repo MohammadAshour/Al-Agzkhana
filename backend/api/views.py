@@ -1,11 +1,17 @@
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
-from .models import Medicine, MedicineInstance, Condition
-from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer
+from .models import Medicine, MedicineInstance, Condition, Location
+from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer
 
 class ConditionViewSet(viewsets.ModelViewSet):
     queryset = Condition.objects.all()
     serializer_class = ConditionSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+
+class LocationViewSet(viewsets.ModelViewSet):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
     filter_backends = [SearchFilter]
     search_fields = ['name']
 
@@ -19,4 +25,4 @@ class MedicineInstanceViewSet(viewsets.ModelViewSet):
     queryset = MedicineInstance.objects.all()
     serializer_class = MedicineInstanceSerializer
     filter_backends = [SearchFilter]
-    search_fields = ['medicine__name_ar', 'medicine__name_en', 'location']
+    search_fields = ['medicine__name_ar', 'medicine__name_en', 'location__name']

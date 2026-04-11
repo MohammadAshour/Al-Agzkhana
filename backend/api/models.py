@@ -18,11 +18,17 @@ class Medicine(models.Model):
     def __str__(self):
         return self.name_ar
 
+class Location(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+        
 class MedicineInstance(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     production_date = models.DateField()
     open_date = models.DateField(null=True, blank=True)
-    location = models.CharField(max_length=200)
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f"{self.medicine.name_ar} - {self.location}"

@@ -1,9 +1,14 @@
 from rest_framework import serializers
-from .models import Medicine, MedicineInstance, Condition
+from .models import Medicine, MedicineInstance, Condition, Location
 
 class ConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Condition
+        fields = '__all__'
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
         fields = '__all__'
 
 class MedicineSerializer(serializers.ModelSerializer):
@@ -20,6 +25,10 @@ class MedicineInstanceSerializer(serializers.ModelSerializer):
     medicine = MedicineSerializer(read_only=True)
     medicine_id = serializers.PrimaryKeyRelatedField(
         queryset=Medicine.objects.all(), source='medicine', write_only=True
+    )
+    location = LocationSerializer(read_only=True)
+    location_id = serializers.PrimaryKeyRelatedField(
+        queryset=Location.objects.all(), source='location', write_only=True
     )
 
     class Meta:
