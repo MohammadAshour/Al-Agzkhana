@@ -12,6 +12,8 @@ class Medicine(models.Model):
     shelf_life_months = models.PositiveIntegerField()
     shelf_life_after_opening_months = models.PositiveIntegerField()
     conditions = models.ManyToManyField(Condition)
+    safe_during_pregnancy = models.BooleanField(default=False)
+    safe_during_breastfeeding = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name_ar
