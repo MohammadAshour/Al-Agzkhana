@@ -25,7 +25,7 @@ export default function Home() {
     setLoading(true);
     const res = await fetch(`${API_URL}/api/medicines/?search=${search}`);
     const data = await res.json();
-    setResults(data.results || []);
+    setResults(data.results || data || []);
     setLoading(false);
   }
 
