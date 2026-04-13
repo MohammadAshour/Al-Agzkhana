@@ -13,31 +13,12 @@ export default function Home() {
     fetchExpired();
   }, []);
 
-  async function fetchExpired() {
+async function fetchExpired() {
     const res = await fetch(`${API_URL}/api/instances/`);
     const data = await res.json();
-    const today = new Date();
-    const exp = data.results?.filter(instance => {
-      const expiryDate = getExpiryDate(instance);
-      return expiryDate && expiryDate <= today;
-    });
+    const exp = (data.results || data).filter(instance => instance.is_expired);
     setExpired(exp || []);
-  }
-
-  function getExpiryDate(instance) {
-    const med = instance.medicine;
-    if (!med) return null;
-    const prod = new Date(instance.production_date);
-    const fullExpiry = new Date(prod);
-    fullExpiry.setMonth(fullExpiry.getMonth() + med.shelf_life_months);
-    if (instance.open_date) {
-      const open = new Date(instance.open_date);
-      const openExpiry = new Date(open);
-      openExpiry.setMonth(openExpiry.getMonth() + med.shelf_life_after_opening_months);
-      return openExpiry < fullExpiry ? openExpiry : fullExpiry;
-    }
-    return fullExpiry;
-  }
+}
 
   async function handleSearch(e) {
     e.preventDefault();
