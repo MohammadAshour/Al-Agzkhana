@@ -32,9 +32,9 @@ export default function Home() {
   return (
     <div>
       {expired.length > 0 && (
-        <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-6">
+        <a href="/inventory" className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-6">
           <strong>⚠️ تحذير:</strong> {expired.length} دواء انتهت صلاحيته، يرجى التخلص منه!
-        </div>
+        </a>
       )}
 
       <div className="max-w-2xl mx-auto mb-8">
