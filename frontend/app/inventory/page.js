@@ -14,9 +14,19 @@ export default function Inventory() {
   async function fetchInstances() {
     const res = await fetch(`${API_URL}/api/instances/`);
     const data = await res.json();
-    setInstances(data.results || data || []);
+    const all = data.results || data || [];
+    
+    const sorted = all.sort((a, b) => {
+      // المنتهي الصلاحية الأول
+      if (a.is_expired && !b.is_expired) return -1;
+      if (!a.is_expired && b.is_expired) return 1;
+      // بعدين ترتيب أبجدي عربي
+      return a.medicine?.name_ar.localeCompare(b.medicine?.name_ar, 'ar');
+    });
+    
+    setInstances(sorted);
     setLoading(false);
-  }
+}
 
   async function handleDelete(id) {
     if (!confirm('هل أنت متأكد من الحذف؟')) return;
