@@ -32,10 +32,11 @@ export default function Home() {
   return (
     <div>
       {expired.length > 0 && (
-        <a href="/inventory" className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-6">
-          <strong>⚠️ تحذير:</strong> {expired.length} دواء انتهت صلاحيته، يرجى التخلص منه!
-        </a>
-      )}
+  <a href="/inventory" className="flex items-center gap-2 bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-6 hover:bg-red-200">
+    <span className="text-xl">⚠️</span>
+    <span><strong>تحذير:</strong> {expired.length} دواء انتهت صلاحيته، اضغط هنا للمخزون!</span>
+  </a>
+)}
 
       <div className="max-w-2xl mx-auto mb-8">
         <form onSubmit={handleSearch} className="flex gap-2">
