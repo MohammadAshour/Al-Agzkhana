@@ -13,12 +13,11 @@ export default function Home() {
     fetchExpired();
   }, []);
 
-async function fetchExpired() {
-    const res = await fetch(`${API_URL}/api/instances/`);
+  async function fetchExpired() {
+    const res = await fetch(`${API_URL}/api/instances/?expired=true`);
     const data = await res.json();
-    const exp = (data.results || data).filter(instance => instance.is_expired);
-    setExpired(exp || []);
-}
+    setExpired(data.results || data);
+  }
 
   async function handleSearch(e) {
     e.preventDefault();
