@@ -30,6 +30,8 @@ class MedicineInstanceSerializer(serializers.ModelSerializer):
     location_id = serializers.PrimaryKeyRelatedField(
         queryset=Location.objects.all(), source='location', write_only=True
     )
+    expiry_date = serializers.ReadOnlyField()
+    is_expired = serializers.ReadOnlyField()
 
     class Meta:
         model = MedicineInstance

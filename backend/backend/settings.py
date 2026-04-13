@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['al-agzkhana-production.up.railway.app']
+ALLOWED_HOSTS = ['localhost','127.0.0.1','al-agzkhana-production.up.railway.app']
 
 # Application definition
 

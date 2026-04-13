@@ -1,4 +1,6 @@
 from django.db import models
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 class Condition(models.Model):
     name = models.CharField(max_length=200)
@@ -29,6 +31,18 @@ class MedicineInstance(models.Model):
     production_date = models.DateField()
     open_date = models.DateField(null=True, blank=True)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+
+    @property
+    def expiry_date(self):
+        full_expiry = self.production_date + relativedelta(months=self.medicine.shelf_life_months)
+        if self.open_date:
+            open_expiry = self.open_date + relativedelta(months=self.medicine.shelf_life_after_opening_months)
+            return min(full_expiry, open_expiry)
+        return full_expiry
+
+    @property
+    def is_expired(self):
+        return self.expiry_date < date.today()
 
     def __str__(self):
         return f"{self.medicine.name_ar} - {self.location}"
