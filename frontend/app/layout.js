@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
     <html lang="ar" dir="rtl">
       <body className="min-h-screen bg-gray-50">
         <nav className="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
-          <link href="/" className="hover:text-blue-200">الأجزخانة</link>
+          <Link href="/" className="hover:text-blue-200">الأجزخانة</Link>
           <div className="flex gap-6">
             <a href="/medicines" className="hover:text-blue-200">الأدوية</a>
             <a href="/inventory" className="hover:text-blue-200">المخزون</a>
