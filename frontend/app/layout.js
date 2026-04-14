@@ -4,6 +4,12 @@ import "./globals.css";
 export const metadata = {
   title: "الأجزخانة",
   description: "نظام إدارة أدوية المنزل",
+  themeColor: "#1e3a5f",
+  manifest: "/manifest.json",
+  icons: [
+    { rel: "icon", url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    { rel: "icon", url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+  ],
 };
 
 export default function RootLayout({ children }) {
