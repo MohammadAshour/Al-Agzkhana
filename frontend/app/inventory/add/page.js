@@ -60,6 +60,22 @@ export default function AddInventory() {
     router.push('/inventory');
   }
 
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    const payload = {
+      ...form,
+      location_id: form.location_id || null,
+      open_date: form.open_date || null,
+    };
+    await fetch(`${API_URL}/api/instances/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    router.push('/inventory');
+  }
+  
   return (
     <div className="max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold text-blue-900 mb-6">إضافة دواء للمنزل</h2>
