@@ -1,10 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function EditInventory({ params }) {
+  const { id } = use(params);
   const router = useRouter();
   const [medicines, setMedicines] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -37,7 +38,7 @@ export default function EditInventory({ params }) {
   }
 
   async function fetchInstance() {
-    const res = await fetch(`${API_URL}/api/instances/${params.id}/`);
+    const res = await fetch(`${API_URL}/api/instances/${id}/`);
     const data = await res.json();
     setForm({
       medicine_id: data.medicine?.id || '',
@@ -64,7 +65,7 @@ export default function EditInventory({ params }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    await fetch(`${API_URL}/api/instances/${params.id}/`, {
+    await fetch(`${API_URL}/api/instances/${id}/`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
