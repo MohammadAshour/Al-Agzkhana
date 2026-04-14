@@ -1,10 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function EditMedicine({ params }) {
+  const { id } = use(params);
   const router = useRouter();
   const [conditions, setConditions] = useState([]);
   const [newCondition, setNewCondition] = useState('');
@@ -32,7 +33,7 @@ export default function EditMedicine({ params }) {
   }
 
   async function fetchMedicine() {
-    const res = await fetch(`${API_URL}/api/medicines/${params.id}/`);
+    const res = await fetch(`${API_URL}/api/medicines/${id}/`);
     const data = await res.json();
     setForm({
       name_ar: data.name_ar,
@@ -70,7 +71,7 @@ export default function EditMedicine({ params }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    await fetch(`${API_URL}/api/medicines/${params.id}/`, {
+    await fetch(`${API_URL}/api/medicines/${id}/`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
