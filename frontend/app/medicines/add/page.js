@@ -101,6 +101,15 @@ export default function AddMedicine() {
             <input type="checkbox" checked={form.safe_during_breastfeeding} onChange={e => setForm({...form, safe_during_breastfeeding: e.target.checked})} />
             آمن للرضاعة
           </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={form.safe_for_diabetics} onChange={e => setForm({...form, safe_for_diabetics: e.target.checked})} />
+            آمن لمرضى السكري
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={form.safe_for_hypertensive} onChange={e => setForm({...form, safe_for_hypertensive: e.target.checked})} />
+            آمن لمرضى الضغط
+          </label>
+          
         </div>
 
         <div>

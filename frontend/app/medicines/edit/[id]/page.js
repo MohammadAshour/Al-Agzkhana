@@ -42,6 +42,8 @@ export default function EditMedicine({ params }) {
       shelf_life_after_opening_months: data.shelf_life_after_opening_months,
       safe_during_pregnancy: data.safe_during_pregnancy,
       safe_during_breastfeeding: data.safe_during_breastfeeding,
+      safe_for_diabetics: data.safe_for_diabetics,
+      safe_for_hypertensive: data.safe_for_hypertensive,
       condition_ids: data.conditions?.map(c => c.id) || [],
     });
   }
@@ -116,6 +118,14 @@ export default function EditMedicine({ params }) {
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={form.safe_during_breastfeeding} onChange={e => setForm({...form, safe_during_breastfeeding: e.target.checked})} />
             آمن للرضاعة
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={form.safe_for_diabetics} onChange={e => setForm({...form, safe_for_diabetics: e.target.checked})} />
+            آمن لمرضى السكري
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={form.safe_for_hypertensive} onChange={e => setForm({...form, safe_for_hypertensive: e.target.checked})} />
+            آمن لمرضى الضغط
           </label>
         </div>
 

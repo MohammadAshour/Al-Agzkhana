@@ -16,6 +16,8 @@ class Medicine(models.Model):
     conditions = models.ManyToManyField(Condition)
     safe_during_pregnancy = models.BooleanField(default=False)
     safe_during_breastfeeding = models.BooleanField(default=False)
+    safe_for_diabetics = models.BooleanField(default=False)
+    safe_for_hypertensive = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name_ar
