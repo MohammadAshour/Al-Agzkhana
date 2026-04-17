@@ -64,6 +64,15 @@ export default function Home() {
             <div key={med.id} className="bg-white rounded-lg shadow p-4">
               <h3 className="font-bold text-lg">{med.name_ar}</h3>
               {med.name_en && <p className="text-gray-500">{med.name_en}</p>}
+              <p className="text-sm mt-1">
+                {med.safe_during_pregnancy ? '✅ آمن للحمل' : '❌ غير آمن للحمل'}
+                {' | '}
+                {med.safe_during_breastfeeding ? '✅ آمن للرضاعة' : '❌ غير آمن للرضاعة'}
+                {' | '}
+                {med.safe_for_diabetics ? '✅ آمن لمرضى السكري' : '❌ غير آمن لمرضى السكري'}
+                {' | '}
+                {med.safe_for_hypertensive ? '✅ آمن لمرضى الضغط' : '❌ غير آمن لمرضى الضغط'}
+              </p>
               <div className="flex flex-wrap gap-2 mt-2">
                 {med.conditions?.map(c => (
                   <span key={c.id} className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded">
