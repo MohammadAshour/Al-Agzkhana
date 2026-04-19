@@ -37,9 +37,6 @@ export default function Inventory() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-blue-900">الحالات الطبية</h2>
-        <a href="/conditions/add" className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-600">
-          ➕ إضافة حالة طبية
-        </a>
       </div>
 
       {instances.length === 0 ? (
