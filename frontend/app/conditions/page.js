@@ -50,7 +50,7 @@ export default function Inventory() {
             <div key={instance.id} className={`rounded-lg shadow p-4 border ${getStatusColor(instance)}`}>
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-lg">{instance.condition?.name}</h3>
+                  <h3 className="font-bold text-lg">{instance.name}</h3>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleDelete(instance.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500">
