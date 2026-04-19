@@ -68,7 +68,8 @@ export default function Home() {
                 {med.safe_during_pregnancy ? '✅ آمن للحمل' : '❌ غير آمن للحمل'}
                 {' | '}
                 {med.safe_during_breastfeeding ? '✅ آمن للرضاعة' : '❌ غير آمن للرضاعة'}
-                {' | '}
+               </p>
+              <p className="text-sm mt-1">
                 {med.safe_for_diabetics ? '✅ آمن لمرضى السكري' : '❌ غير آمن لمرضى السكري'}
                 {' | '}
                 {med.safe_for_hypertensive ? '✅ آمن لمرضى الضغط' : '❌ غير آمن لمرضى الضغط'}
