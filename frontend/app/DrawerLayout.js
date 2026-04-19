@@ -7,9 +7,8 @@ import { usePathname } from 'next/navigation';
 const navItems = [
   { href: '/', label: 'الرئيسية', icon: '🏠' },
   { href: '/medicines', label: 'الأدوية', icon: '💊' },
-  { href: '/medicines/add', label: 'إضافة دواء', icon: '➕' },
   { href: '/inventory', label: 'المخزون', icon: '📦' },
-  { href: '/inventory/add', label: 'إضافة للمنزل', icon: '🏡' },
+  { href: '/conditions', label: 'الحالات', icon: '🏥' },
 ];
 
 export default function DrawerLayout({ children }) {
