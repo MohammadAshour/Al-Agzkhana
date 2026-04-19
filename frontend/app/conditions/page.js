@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function Inventory() {
+export default function Conditions() {
   const [instances, setInstances] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,7 +29,6 @@ export default function Inventory() {
     await fetch(`${API_URL}/api/conditions/${id}/`, { method: 'DELETE' });
     fetchInstances();
   }
-
 
   if (loading) return <p className="text-center text-gray-500">جاري التحميل...</p>;
 
