@@ -16,6 +16,12 @@ export default function LoginPage() {
     }
   }, [session]);
 
+  useEffect(() => {
+    if (session) {
+      router.push('/');
+    }
+  }, [session, router]);
+
   if (status === "loading") {
     return (
       <div className="flex justify-center items-center min-h-64">

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import "./globals.css";
+import DrawerLayout from "./DrawerLayout";
 import SessionWrapper from "./components/SessionWrapper";
 
 export const metadata = {
@@ -18,23 +18,7 @@ export default function RootLayout({ children }) {
     <html lang="ar" dir="rtl">
       <body className="min-h-screen bg-gray-50">
         <SessionWrapper>
-          <nav className="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="hover:text-blue-200">
-              الأجزخانة
-            </Link>
-            <div className="flex gap-6 items-center">
-              <a href="/medicines" className="hover:text-blue-200">
-                الأدوية
-              </a>
-              <a href="/inventory" className="hover:text-blue-200">
-                المخزون
-              </a>
-              <a href="/auth/login" className="hover:text-blue-200">
-                تسجيل الدخول
-              </a>
-            </div>
-          </nav>
-          <main className="container mx-auto px-4 py-8">{children}</main>
+          <DrawerLayout>{children}</DrawerLayout>
         </SessionWrapper>
       </body>
     </html>

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 
-const navItems = [
+const staticNavItems = [
   { href: '/', label: 'الرئيسية', icon: '🏠' },
   { href: '/medicines', label: 'الأدوية', icon: '💊' },
   { href: '/inventory', label: 'المخزون', icon: '📦' },
@@ -14,6 +15,8 @@ const navItems = [
 export default function DrawerLayout({ children }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     setOpen(false);
@@ -29,6 +32,32 @@ export default function DrawerLayout({ children }) {
       document.body.style.overflow = '';
     };
   }, [open]);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    const publicPaths = ['/auth/login'];
+    if (status === 'unauthenticated' && !publicPaths.includes(pathname)) {
+      router.push('/auth/login');
+    }
+  }, [status, pathname, router]);
+
+  // Show nothing while checking auth (except on login page)
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500 text-lg">جاري التحميل...</p>
+      </div>
+    );
+  }
+
+  // Render login page without drawer
+  if (status === 'unauthenticated') {
+    return (
+      <main className="container mx-auto px-4 py-8">
+        {children}
+      </main>
+    );
+  }
 
   return (
     <>
@@ -78,9 +107,26 @@ export default function DrawerLayout({ children }) {
           </button>
         </div>
 
+        {/* User info */}
+        {session?.user && (
+          <div className="px-5 py-3 border-b border-blue-700 flex items-center gap-3">
+            {session.user.image && (
+              <img
+                src={session.user.image}
+                alt="avatar"
+                className="w-9 h-9 rounded-full"
+              />
+            )}
+            <div className="overflow-hidden">
+              <p className="text-sm font-semibold truncate">{session.user.name}</p>
+              <p className="text-xs text-blue-300 truncate">{session.user.email}</p>
+            </div>
+          </div>
+        )}
+
         <nav className="flex-1 overflow-y-auto py-4 px-3">
           <ul className="flex flex-col gap-1">
-            {navItems.map(({ href, label, icon }) => {
+            {staticNavItems.map(({ href, label, icon }) => {
               const active = pathname === href;
               return (
                 <li key={href}>
@@ -98,6 +144,20 @@ export default function DrawerLayout({ children }) {
                 </li>
               );
             })}
+
+            {/* Sign out button */}
+            <li>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('authToken');
+                  signOut({ callbackUrl: '/auth/login' });
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors hover:bg-red-700 text-blue-100"
+              >
+                <span className="text-xl">🚪</span>
+                <span>تسجيل خروج</span>
+              </button>
+            </li>
           </ul>
         </nav>
 
