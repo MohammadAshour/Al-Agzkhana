@@ -1,10 +1,13 @@
 'use client';
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
+import FamilyGuard from '../../components/FamilyGuard';
+import { getFamilyId } from '../../lib/family';
+import { getAuthHeaders } from '../../lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function EditInventory({ params }) {
+function EditInventoryContent({ params }) {
   const { id } = use(params);
   const router = useRouter();
   const [medicines, setMedicines] = useState([]);
@@ -26,19 +29,20 @@ export default function EditInventory({ params }) {
   }, []);
 
   async function fetchMedicines() {
-    const res = await fetch(`${API_URL}/api/medicines/`);
+    const res = await fetch(`${API_URL}/api/medicines/`, { headers: getAuthHeaders() });
     const data = await res.json();
     setMedicines(data.results || data || []);
   }
 
   async function fetchLocations() {
-    const res = await fetch(`${API_URL}/api/locations/`);
+    const familyId = getFamilyId();
+    const res = await fetch(`${API_URL}/api/locations/?family_id=${familyId}`, { headers: getAuthHeaders() });
     const data = await res.json();
     setLocations(data.results || data || []);
   }
 
   async function fetchInstance() {
-    const res = await fetch(`${API_URL}/api/instances/${id}/`);
+    const res = await fetch(`${API_URL}/api/instances/${id}/`, { headers: getAuthHeaders() });
     const data = await res.json();
     setForm({
       medicine_id: data.medicine?.id || '',
@@ -50,10 +54,11 @@ export default function EditInventory({ params }) {
 
   async function addNewLocation() {
     if (!newLocation.trim()) return;
+    const familyId = getFamilyId();
     const res = await fetch(`${API_URL}/api/locations/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newLocation }),
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ name: newLocation, family_id: familyId }),
     });
     const data = await res.json();
     setLocations([...locations, data]);
@@ -65,14 +70,16 @@ export default function EditInventory({ params }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    const familyId = getFamilyId();
     const payload = {
       ...form,
       location_id: form.location_id || null,
       open_date: form.open_date || null,
+      family_id: familyId,
     };
     await fetch(`${API_URL}/api/instances/${id}/`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload),
     });
     router.push('/inventory');
@@ -142,4 +149,8 @@ export default function EditInventory({ params }) {
       </form>
     </div>
   );
+}
+
+export default function EditInventory() {
+  return <FamilyGuard><EditInventoryContent /></FamilyGuard>;
 }

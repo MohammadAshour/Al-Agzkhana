@@ -1,9 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
+import FamilyGuard from '../components/FamilyGuard';
+import { getFamilyId } from '../lib/family';
+import { getAuthHeaders } from '../lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function Inventory() {
+function InventoryContent() {
   const [instances, setInstances] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,25 +15,29 @@ export default function Inventory() {
   }, []);
 
   async function fetchInstances() {
-    const res = await fetch(`${API_URL}/api/instances/`);
+    const familyId = getFamilyId();
+    const res = await fetch(`${API_URL}/api/instances/?family_id=${familyId}`, {
+      headers: getAuthHeaders()
+    });
     const data = await res.json();
     const all = data.results || data || [];
     
     const sorted = all.sort((a, b) => {
-      // المنتهي الصلاحية الأول
       if (a.is_expired && !b.is_expired) return -1;
       if (!a.is_expired && b.is_expired) return 1;
-      // بعدين ترتيب أبجدي عربي
       return a.medicine?.name_ar.localeCompare(b.medicine?.name_ar, 'ar');
     });
     
     setInstances(sorted);
     setLoading(false);
-}
+  }
 
   async function handleDelete(id) {
     if (!confirm('هل أنت متأكد من الحذف؟')) return;
-    await fetch(`${API_URL}/api/instances/${id}/`, { method: 'DELETE' });
+    await fetch(`${API_URL}/api/instances/${id}/`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
     fetchInstances();
   }
 
@@ -93,4 +100,8 @@ export default function Inventory() {
       )}
     </div>
   );
+}
+
+export default function Inventory() {
+  return <FamilyGuard><InventoryContent /></FamilyGuard>;
 }

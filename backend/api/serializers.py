@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Medicine, MedicineInstance, Condition, Location
+from django.contrib.auth.models import User
+from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership
 
 class ConditionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,7 +29,7 @@ class MedicineInstanceSerializer(serializers.ModelSerializer):
     )
     location = LocationSerializer(read_only=True)
     location_id = serializers.PrimaryKeyRelatedField(
-        queryset=Location.objects.all(), source='location', write_only=True
+        queryset=Location.objects.all(), source='location', write_only=True, allow_null=True
     )
     expiry_date = serializers.ReadOnlyField()
     is_expired = serializers.ReadOnlyField()
@@ -36,3 +37,22 @@ class MedicineInstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicineInstance
         fields = '__all__'
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name']
+class FamilyMembershipSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    class Meta:
+        model = FamilyMembership
+        fields = ['id', 'user', 'joined_at']
+class FamilySerializer(serializers.ModelSerializer):
+    memberships = FamilyMembershipSerializer(many=True, read_only=True)
+    owner = UserSerializer(read_only=True)
+    member_count = serializers.SerializerMethodField()
+    class Meta:
+        model = Family
+        fields = ['id', 'name', 'code', 'owner', 'memberships', 'member_count', 'created_at']
+    def get_member_count(self, obj):
+        return obj.memberships.count()

@@ -1,5 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { getFamilyId } from '../../lib/family';
+import { getAuthHeaders } from '../../lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -14,7 +16,12 @@ export default function Home() {
   }, []);
 
   async function fetchExpired() {
-    const res = await fetch(`${API_URL}/api/instances/?expired=true`);
+    const familyId = getFamilyId();
+    if (!familyId) { setExpired([]); return; }
+    const res = await fetch(
+      `${API_URL}/api/instances/?expired=true&family_id=${familyId}`,
+      { headers: getAuthHeaders() }
+    );
     const data = await res.json();
     setExpired(data.results || data);
   }

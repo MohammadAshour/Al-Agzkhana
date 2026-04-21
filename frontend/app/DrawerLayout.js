@@ -7,6 +7,7 @@ import { useSession, signOut } from 'next-auth/react';
 
 const staticNavItems = [
   { href: '/', label: 'الرئيسية', icon: '🏠' },
+  { href: '/families', label: 'العائلات', icon: '👨‍👩‍👧‍👦' },
   { href: '/medicines', label: 'الأدوية', icon: '💊' },
   { href: '/inventory', label: 'المخزون', icon: '📦' },
   { href: '/conditions', label: 'الحالات', icon: '🏥' },

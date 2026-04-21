@@ -1,13 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ConditionViewSet, MedicineViewSet, MedicineInstanceViewSet, LocationViewSet
+from .views import ConditionViewSet, MedicineViewSet, MedicineInstanceViewSet, LocationViewSet, FamilyViewSet
 from .auth_views import google_login
 
 router = DefaultRouter()
 router.register(r'conditions', ConditionViewSet)
-router.register(r'locations', LocationViewSet)
+router.register(r'locations', LocationViewSet, basename='location')
 router.register(r'medicines', MedicineViewSet)
-router.register(r'instances', MedicineInstanceViewSet)
+router.register(r'instances', MedicineInstanceViewSet, basename='medicine-instance')
+router.register(r'families', FamilyViewSet, basename='family')
 
 urlpatterns = [
     path('', include(router.urls)),

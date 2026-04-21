@@ -1,10 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import FamilyGuard from '../../components/FamilyGuard';
+import { getFamilyId } from '../../lib/family';
+import { getAuthHeaders } from '../../lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function AddInventory() {
+function AddInventoryContent() {
   const router = useRouter();
   const [medicines, setMedicines] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -24,23 +27,25 @@ export default function AddInventory() {
   }, []);
 
   async function fetchMedicines() {
-    const res = await fetch(`${API_URL}/api/medicines/`);
+    const res = await fetch(`${API_URL}/api/medicines/`, { headers: getAuthHeaders() });
     const data = await res.json();
     setMedicines(data.results || data || []);
   }
 
   async function fetchLocations() {
-    const res = await fetch(`${API_URL}/api/locations/`);
+    const familyId = getFamilyId();
+    const res = await fetch(`${API_URL}/api/locations/?family_id=${familyId}`, { headers: getAuthHeaders() });
     const data = await res.json();
     setLocations(data.results || data || []);
   }
 
   async function addNewLocation() {
     if (!newLocation.trim()) return;
+    const familyId = getFamilyId();
     const res = await fetch(`${API_URL}/api/locations/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newLocation }),
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ name: newLocation, family_id: familyId }),
     });
     const data = await res.json();
     setLocations([...locations, data]);
@@ -52,25 +57,16 @@ export default function AddInventory() {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    await fetch(`${API_URL}/api/instances/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    router.push('/inventory');
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
+    const familyId = getFamilyId();
     const payload = {
       ...form,
       location_id: form.location_id || null,
       open_date: form.open_date || null,
+      family_id: familyId,
     };
     await fetch(`${API_URL}/api/instances/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload),
     });
     router.push('/inventory');
@@ -140,4 +136,8 @@ export default function AddInventory() {
       </form>
     </div>
   );
+}
+
+export default function AddInventory() {
+  return <FamilyGuard><AddInventoryContent /></FamilyGuard>;
 }
