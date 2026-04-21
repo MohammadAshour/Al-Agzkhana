@@ -1,8 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuthHeaders } from '../lib/api';
-import { setSelectedFamily, getSelectedFamily } from '../lib/family';
+import { getAuthHeaders } from '@/app/lib/api';
+import { setSelectedFamily, getSelectedFamily } from '@/app/lib/family';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 

@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import FamilyGuard from '../../components/FamilyGuard';
-import { getFamilyId } from '../../lib/family';
-import { getAuthHeaders } from '../../lib/api';
+import FamilyGuard from '@/app/components/FamilyGuard';
+import { getFamilyId } from '@/app/lib/family';
+import { getAuthHeaders } from '@/app/lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 

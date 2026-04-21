@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSelectedFamily } from '../lib/family';
+import { getSelectedFamily } from '@/app/lib/family';
 
 export default function FamilyGuard({ children }) {
   const [family, setFamily] = useState(null);
