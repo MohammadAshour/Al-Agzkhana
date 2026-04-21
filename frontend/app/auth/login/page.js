@@ -8,13 +8,11 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (session) {
-      // Store Django token for API calls
-      if (session.djangoToken) {
-        localStorage.setItem("authToken", session.djangoToken);
-      }
-    }
-  }, [session]);
+  if (session?.djangoToken) {
+    localStorage.setItem('authToken', session.djangoToken);
+    console.log('Token stored:', session.djangoToken.substring(0, 8) + '...');
+  }
+}, [session]);
 
   useEffect(() => {
     if (session) {

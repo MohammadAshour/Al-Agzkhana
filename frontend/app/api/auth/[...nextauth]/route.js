@@ -1,6 +1,21 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
+const res = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: account.id_token }),
+  }
+);
+const data = await res.json();
+console.log('Django auth response:', res.status, data);  // ADD THIS
+if (data.token) {
+  token.djangoToken = data.token;
+  token.user = data.user;
+}
+
 const handler = NextAuth({
   providers: [
     GoogleProvider({

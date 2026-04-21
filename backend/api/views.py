@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership
 from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer
@@ -29,6 +30,8 @@ class ConditionViewSet(viewsets.ModelViewSet):
 
 class LocationViewSet(viewsets.ModelViewSet):
     serializer_class = LocationSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
     search_fields = ['name']
     def get_queryset(self):
@@ -50,6 +53,8 @@ class MedicineViewSet(viewsets.ModelViewSet):
 
 class MedicineInstanceViewSet(viewsets.ModelViewSet):
     serializer_class = MedicineInstanceSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
     search_fields = ['medicine__name_ar', 'medicine__name_en', 'location__name']
 
@@ -70,6 +75,7 @@ class MedicineInstanceViewSet(viewsets.ModelViewSet):
 
 class FamilyViewSet(viewsets.ModelViewSet):
     serializer_class = FamilySerializer
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -87,29 +93,29 @@ class FamilyViewSet(viewsets.ModelViewSet):
         try:
             family = Family.objects.get(code=code)
         except Family.DoesNotExist:
-            return Response({'error': 'Invalid code'}, status=404)
+            return Response({'error': 'كود غير صحيح'}, status=404)
         if family.owner == request.user:
-            return Response({'error': 'You own this family'}, status=400)
+            return Response({'error': 'أنت صاحب هذه العائلة'}, status=400)
         membership, created = FamilyMembership.objects.get_or_create(
             family=family, user=request.user
         )
         if not created:
-            return Response({'error': 'Already a member'}, status=400)
+            return Response({'error': 'أنت بالفعل عضو'}, status=400)
         return Response(FamilySerializer(family).data)
 
     @action(detail=True, methods=['post'], url_path='leave')
     def leave(self, request, pk=None):
         family = self.get_object()
         if family.owner == request.user:
-            return Response({'error': 'Owner cannot leave. Delete the family instead.'}, status=400)
+            return Response({'error': 'المالك لا يمكنه المغادرة'}, status=400)
         FamilyMembership.objects.filter(family=family, user=request.user).delete()
         return Response(status=204)
-
+    
     @action(detail=True, methods=['post'], url_path='remove-member')
     def remove_member(self, request, pk=None):
         family = self.get_object()
         if family.owner != request.user:
-            return Response({'error': 'Only owner can remove members'}, status=403)
+            return Response({'error': 'صاحب العائلة فقط يمكنه الحذف'}, status=403)
         user_id = request.data.get('user_id')
         FamilyMembership.objects.filter(family=family, user_id=user_id).delete()
         return Response(status=204)
