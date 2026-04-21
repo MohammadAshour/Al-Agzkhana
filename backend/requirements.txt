@@ -17,7 +17,7 @@ comm==0.2.3
 debugpy==1.8.17
 decorator==5.2.1
 defusedxml==0.7.1
-Django==6.0.4
+Django>=4.2,<6.0
 django-cors-headers==4.9.0
 djangorestframework==3.17.1
 executing==2.2.1
