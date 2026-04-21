@@ -7,7 +7,7 @@ router = DefaultRouter()
 router.register(r'conditions', ConditionViewSet)
 router.register(r'locations', LocationViewSet, basename='location')
 router.register(r'medicines', MedicineViewSet)
-router.register(r'instances', MedicineInstanceViewSet, basename='medicine-instance')
+router.register(r'instances', MedicineInstanceViewSet, basename='instance')
 router.register(r'families', FamilyViewSet, basename='family')
 
 urlpatterns = [
