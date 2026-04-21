@@ -8,16 +8,19 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-  if (session?.djangoToken) {
-    localStorage.setItem('authToken', session.djangoToken);
-    console.log('Token stored:', session.djangoToken.substring(0, 8) + '...');
-  }
-}, [session]);
+    if (session) {
+      console.log("Full session object:", JSON.stringify(session, null, 2));
+      if (session.djangoToken) {
+        localStorage.setItem("authToken", session.djangoToken);
+        console.log("Token stored successfully");
+      } else {
+        console.warn("No djangoToken in session — Django auth exchange failed");
+      }
+    }
+  }, [session]);
 
   useEffect(() => {
-    if (session) {
-      router.push('/');
-    }
+    if (session) router.push("/");
   }, [session, router]);
 
   if (status === "loading") {
@@ -35,7 +38,11 @@ export default function LoginPage() {
         <h2 className="text-2xl font-bold text-blue-900 mb-2">
           مرحباً، {session.user?.name || session.user?.email}
         </h2>
-        <p className="text-gray-600 mb-6">{session.user?.email}</p>
+        {!session.djangoToken && (
+          <p className="text-red-500 text-sm mb-4">
+            ⚠️ فشل ربط حساب Google بالخادم
+          </p>
+        )}
         <button
           onClick={() => {
             localStorage.removeItem("authToken");
@@ -53,12 +60,10 @@ export default function LoginPage() {
     <div className="max-w-md mx-auto mt-16 bg-white rounded-lg shadow p-8 text-center">
       <div className="text-6xl mb-4">🔐</div>
       <h2 className="text-2xl font-bold text-blue-900 mb-2">تسجيل الدخول</h2>
-      <p className="text-gray-600 mb-8">
-        سجل دخولك لإدارة أدوية المنزل
-      </p>
+      <p className="text-gray-600 mb-8">سجل دخولك لإدارة أدوية المنزل</p>
       <button
         onClick={() => signIn("google", { callbackUrl: "/" })}
-        className="flex items-center justify-center gap-3 bg-white border-2 border-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 hover:border-gray-300 w-full transition-all"
+        className="flex items-center justify-center gap-3 bg-white border-2 border-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 w-full transition-all"
       >
         <svg width="20" height="20" viewBox="0 0 48 48">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>

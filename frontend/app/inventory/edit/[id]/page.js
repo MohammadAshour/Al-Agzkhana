@@ -29,20 +29,20 @@ function EditInventoryContent({ params }) {
   }, []);
 
   async function fetchMedicines() {
-    const res = await fetch(`${API_URL}/api/medicines/`, { headers: getAuthHeaders() });
+    const res = await fetch(`${API_URL}/api/medicines/`, { headers: await getAuthHeaders() });
     const data = await res.json();
     setMedicines(data.results || data || []);
   }
 
   async function fetchLocations() {
     const familyId = getFamilyId();
-    const res = await fetch(`${API_URL}/api/locations/?family_id=${familyId}`, { headers: getAuthHeaders() });
+    const res = await fetch(`${API_URL}/api/locations/?family_id=${familyId}`, { headers: await getAuthHeaders() });
     const data = await res.json();
     setLocations(data.results || data || []);
   }
 
   async function fetchInstance() {
-    const res = await fetch(`${API_URL}/api/instances/${id}/`, { headers: getAuthHeaders() });
+    const res = await fetch(`${API_URL}/api/instances/${id}/`, { headers: await getAuthHeaders() });
     const data = await res.json();
     setForm({
       medicine_id: data.medicine?.id || '',
@@ -57,7 +57,7 @@ function EditInventoryContent({ params }) {
     const familyId = getFamilyId();
     const res = await fetch(`${API_URL}/api/locations/`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify({ name: newLocation, family_id: familyId }),
     });
     const data = await res.json();
@@ -79,7 +79,7 @@ function EditInventoryContent({ params }) {
     };
     await fetch(`${API_URL}/api/instances/${id}/`, {
       method: 'PUT',
-      headers: getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(payload),
     });
     router.push('/inventory');

@@ -17,7 +17,7 @@ function InventoryContent() {
   async function fetchInstances() {
     const familyId = getFamilyId();
     const res = await fetch(`${API_URL}/api/instances/?family_id=${familyId}`, {
-      headers: getAuthHeaders()
+      headers: await getAuthHeaders()
     });
     const data = await res.json();
     const all = data.results || data || [];
@@ -36,7 +36,7 @@ function InventoryContent() {
     if (!confirm('هل أنت متأكد من الحذف؟')) return;
     await fetch(`${API_URL}/api/instances/${id}/`, {
       method: 'DELETE',
-      headers: getAuthHeaders()
+      headers: await getAuthHeaders()
     });
     fetchInstances();
   }

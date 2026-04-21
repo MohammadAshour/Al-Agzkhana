@@ -20,7 +20,7 @@ export default function Home() {
     if (!familyId) { setExpired([]); return; }
     const res = await fetch(
       `${API_URL}/api/instances/?expired=true&family_id=${familyId}`,
-      { headers: getAuthHeaders() }
+      { headers: await getAuthHeaders() }
     );
     const data = await res.json();
     setExpired(data.results || data);

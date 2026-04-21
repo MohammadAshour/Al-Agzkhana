@@ -12,6 +12,7 @@ const authOptions = {
     async jwt({ token, account }) {
       if (account?.provider === "google" && account.id_token) {
         try {
+          console.log("Exchanging Google token with Django...");
           const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/`,
             {
@@ -20,23 +21,25 @@ const authOptions = {
               body: JSON.stringify({ token: account.id_token }),
             }
           );
+          console.log("Django response status:", res.status);
           const data = await res.json();
+          console.log("Django response body:", JSON.stringify(data));
           if (data.token) {
             token.djangoToken = data.token;
             token.user = data.user;
+            console.log("Django token stored in JWT");
+          } else {
+            console.error("No token in Django response:", data);
           }
         } catch (err) {
-          console.error("Django auth error:", err);
+          console.error("Django auth error:", err.message);
         }
       }
       return token;
     },
     async session({ session, token }) {
       session.djangoToken = token.djangoToken;
-      session.user = {
-        ...session.user,
-        ...token.user,
-      };
+      session.user = { ...session.user, ...token.user };
       return session;
     },
   },
@@ -44,5 +47,4 @@ const authOptions = {
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };

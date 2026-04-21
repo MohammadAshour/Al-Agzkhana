@@ -26,7 +26,7 @@ export default function FamiliesPage() {
     setError('');
     try {
       const res = await fetch(`${API_URL}/api/families/`, {
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
       });
       if (res.status === 401) {
         setError('غير مسجل الدخول. يرجى تسجيل الدخول أولاً.');
@@ -51,7 +51,7 @@ export default function FamiliesPage() {
     if (!newFamilyName.trim()) return;
     const res = await fetch(`${API_URL}/api/families/`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify({ name: newFamilyName }),
     });
     if (res.ok) {
@@ -73,7 +73,7 @@ export default function FamiliesPage() {
     if (!joinCode.trim()) return;
     const res = await fetch(`${API_URL}/api/families/join/`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify({ code: joinCode.trim().toUpperCase() }),
     });
     const data = await res.json();
@@ -90,7 +90,7 @@ export default function FamiliesPage() {
     if (!confirm('هل أنت متأكد من المغادرة؟')) return;
     await fetch(`${API_URL}/api/families/${family.id}/leave/`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
     if (selectedId === family.id) {
       setSelectedFamily(null);
@@ -103,7 +103,7 @@ export default function FamiliesPage() {
     if (!confirm('هل أنت متأكد من الحذف؟ سيتم حذف كل المخزون!')) return;
     await fetch(`${API_URL}/api/families/${family.id}/`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
     if (selectedId === family.id) {
       setSelectedFamily(null);
