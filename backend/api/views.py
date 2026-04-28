@@ -9,8 +9,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 
 
-from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission, ActivityLog, Reminder
-from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer, MedicineSubmissionSerializer, ActivityLogSerializer, ReminderSerializer
+from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission, ActivityLog, Reminder, DeviceToken
+from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer, MedicineSubmissionSerializer, ActivityLogSerializer, ReminderSerializer, DeviceTokenSerializer
 
 def get_user_family(request):
     """Get family_id from query param and verify membership."""
@@ -308,3 +308,45 @@ class ReminderViewSet(viewsets.ModelViewSet):
         reminder.is_active = not reminder.is_active
         reminder.save()
         return Response(ReminderSerializer(reminder).data)
+
+class DeviceTokenViewSet(viewsets.ViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['post'], url_path='register')
+    def register(self, request):
+        token = request.data.get('token')
+        platform = request.data.get('platform', 'web')
+
+        if not token:
+            return Response({'error': 'التوكن مطلوب'}, status=400)
+
+        if platform not in ['android', 'ios', 'web']:
+            return Response({'error': 'منصة غير صحيحة'}, status=400)
+
+        device_token, created = DeviceToken.objects.update_or_create(
+            token=token,
+            defaults={
+                'user': request.user,
+                'platform': platform,
+            }
+        )
+
+        return Response({
+            'id': device_token.id,
+            'platform': device_token.platform,
+            'created': created,
+        })
+
+    @action(detail=False, methods=['delete'], url_path='unregister')
+    def unregister(self, request):
+        token = request.data.get('token')
+        if not token:
+            return Response({'error': 'التوكن مطلوب'}, status=400)
+        DeviceToken.objects.filter(token=token, user=request.user).delete()
+        return Response(status=204)
+
+    @action(detail=False, methods=['get'], url_path='list')
+    def list_tokens(self, request):
+        tokens = DeviceToken.objects.filter(user=request.user)
+        return Response(DeviceTokenSerializer(tokens, many=True).data)

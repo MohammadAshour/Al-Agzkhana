@@ -37,6 +37,9 @@ export default function DrawerLayout({ children }) {
       import('@/app/lib/api').then(({ getUserRole }) => {
         getUserRole().then(setUserRole);
       });
+      import('@/app/lib/fcm').then(({ registerDeviceToken }) => {
+        registerDeviceToken();
+      });
     }
   }, [status]);
 
