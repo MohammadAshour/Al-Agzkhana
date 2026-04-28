@@ -2,29 +2,43 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getUserRole } from '@/app/lib/api';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
 
-
-
-const [userRole, setUserRole] = useState('user');
 const staticNavItems = [
   { href: '/', label: 'الرئيسية', icon: '🏠' },
   { href: '/families', label: 'العائلات', icon: '👨‍👩‍👧‍👦' },
   { href: '/medicines', label: 'الأدوية', icon: '💊' },
   { href: '/inventory', label: 'المخزون', icon: '📦' },
   { href: '/conditions', label: 'الحالات', icon: '🏥' },
+  { href: '/activity', label: 'سجل النشاط', icon: '📋' },
   { href: '/profile', label: 'الملف الشخصي', icon: '👤' },
-
 ];
-
 
 export default function DrawerLayout({ children }) {
   const [open, setOpen] = useState(false);
+  const [session, setSession] = useState(null);
+  const [status, setStatus] = useState('loading');
+  const [userRole, setUserRole] = useState('user');
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    // Dynamically import next-auth/react only on client
+    import('next-auth/react').then(({ getSession }) => {
+      getSession().then(s => {
+        setSession(s);
+        setStatus(s ? 'authenticated' : 'unauthenticated');
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      import('@/app/lib/api').then(({ getUserRole }) => {
+        getUserRole().then(setUserRole);
+      });
+    }
+  }, [status]);
 
   useEffect(() => {
     setOpen(false);
@@ -41,7 +55,6 @@ export default function DrawerLayout({ children }) {
     };
   }, [open]);
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     const publicPaths = ['/auth/login'];
     if (status === 'unauthenticated' && !publicPaths.includes(pathname)) {
@@ -49,14 +62,13 @@ export default function DrawerLayout({ children }) {
     }
   }, [status, pathname, router]);
 
-  
-useEffect(() => {
-  if (status === 'authenticated') {
-    getUserRole().then(setUserRole);
+  function handleSignOut() {
+    import('next-auth/react').then(({ signOut }) => {
+      localStorage.removeItem('authToken');
+      signOut({ callbackUrl: '/auth/login' });
+    });
   }
-}, [status]);
 
-  // Show nothing while checking auth (except on login page)
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -65,7 +77,6 @@ useEffect(() => {
     );
   }
 
-  // Render login page without drawer
   if (status === 'unauthenticated') {
     return (
       <main className="container mx-auto px-4 py-8">
@@ -122,7 +133,6 @@ useEffect(() => {
           </button>
         </div>
 
-        {/* User info */}
         {session?.user && (
           <div className="px-5 py-3 border-b border-blue-700 flex items-center gap-3">
             {session.user.image && (
@@ -176,13 +186,9 @@ useEffect(() => {
               </li>
             )}
 
-            {/* Sign out button */}
             <li>
               <button
-                onClick={() => {
-                  localStorage.removeItem('authToken');
-                  signOut({ callbackUrl: '/auth/login' });
-                }}
+                onClick={handleSignOut}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors hover:bg-red-700 text-blue-100"
               >
                 <span className="text-xl">🚪</span>
