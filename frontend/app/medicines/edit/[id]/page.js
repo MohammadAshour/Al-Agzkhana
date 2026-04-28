@@ -131,7 +131,7 @@ export default function EditMedicine({ params }) {
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
 
-        <div className="flex gap-6">
+        <div className="grid grid-cols-2 gap-3">
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={form.safe_during_pregnancy} onChange={e => setForm({...form, safe_during_pregnancy: e.target.checked})} />
             آمن للحمل

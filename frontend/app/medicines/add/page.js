@@ -30,7 +30,7 @@ export default function AddMedicine() {
   async function fetchConditions() {
     const res = await fetch(`${API_URL}/api/conditions/`);
     const data = await res.json();
-    setConditions(data.results || []);
+    setConditions(data.results || data || []);
   }
 
   async function addNewCondition() {
@@ -76,7 +76,7 @@ export default function AddMedicine() {
           <input required value={form.name_ar} onChange={e => setForm({...form, name_ar: e.target.value})}
             className="w-full border rounded-lg px-4 py-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium mb-1">الاسم بالإنجليزي</label>
           <input value={form.name_en} onChange={e => setForm({...form, name_en: e.target.value})}
@@ -111,7 +111,7 @@ export default function AddMedicine() {
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
 
-        <div className="flex gap-6">
+        <div className="grid grid-cols-2 gap-3">
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={form.safe_during_pregnancy} onChange={e => setForm({...form, safe_during_pregnancy: e.target.checked})} />
             آمن للحمل
@@ -128,7 +128,6 @@ export default function AddMedicine() {
             <input type="checkbox" checked={form.safe_for_hypertensive} onChange={e => setForm({...form, safe_for_hypertensive: e.target.checked})} />
             آمن لمرضى الضغط
           </label>
-          
         </div>
 
         <div>
