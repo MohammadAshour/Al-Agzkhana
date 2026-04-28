@@ -41,6 +41,50 @@ class ConditionViewSet(viewsets.ModelViewSet):
     serializer_class = ConditionSerializer
     filter_backends = [SearchFilter]
     search_fields = ['name']
+    authentication_classes = [TokenAuthentication]
+
+    def check_mod_or_admin(self, request):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        return profile.role in ['moderator', 'admin']
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return []
+        return [IsAuthenticated()]
+
+    def create(self, request, *args, **kwargs):
+        if not self.check_mod_or_admin(request):
+            return Response(
+                {'error': 'فقط المشرفون والمديرون يمكنهم إضافة الحالات'},
+                status=403
+            )
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if not self.check_mod_or_admin(request):
+            return Response(
+                {'error': 'فقط المشرفون والمديرون يمكنهم تعديل الحالات'},
+                status=403
+            )
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        if not self.check_mod_or_admin(request):
+            return Response(
+                {'error': 'فقط المشرفون والمديرون يمكنهم تعديل الحالات'},
+                status=403
+            )
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if not self.check_mod_or_admin(request):
+            return Response(
+                {'error': 'فقط المشرفون والمديرون يمكنهم حذف الحالات'},
+                status=403
+            )
+        return super().destroy(request, *args, **kwargs)
 
 class LocationViewSet(viewsets.ModelViewSet):
     serializer_class = LocationSerializer
@@ -64,6 +108,54 @@ class MedicineViewSet(viewsets.ModelViewSet):
     serializer_class = MedicineSerializer
     filter_backends = [SearchFilter]
     search_fields = ['name_ar', 'name_en', 'conditions__name']
+    authentication_classes = [TokenAuthentication]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            # Anyone can view medicines including unauthenticated users
+            return []
+        if self.action == 'create':
+            # Authenticated users can submit but it goes through MedicineSubmission
+            # Direct create is moderator/admin only
+            return [IsAuthenticated()]
+        # update, partial_update, destroy — moderator/admin only
+        return [IsAuthenticated()]
+
+    def check_mod_or_admin(self, request):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        return profile.role in ['moderator', 'admin']
+
+    def create(self, request, *args, **kwargs):
+        if not self.check_mod_or_admin(request):
+            return Response(
+                {'error': 'فقط المشرفون والمديرون يمكنهم إضافة الأدوية مباشرة'},
+                status=403
+            )
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if not self.check_mod_or_admin(request):
+            return Response(
+                {'error': 'فقط المشرفون والمديرون يمكنهم تعديل الأدوية'},
+                status=403
+            )
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        if not self.check_mod_or_admin(request):
+            return Response(
+                {'error': 'فقط المشرفون والمديرون يمكنهم تعديل الأدوية'},
+                status=403
+            )
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if not self.check_mod_or_admin(request):
+            return Response(
+                {'error': 'فقط المشرفون والمديرون يمكنهم حذف الأدوية'},
+                status=403
+            )
+        return super().destroy(request, *args, **kwargs)
 
 class MedicineInstanceViewSet(viewsets.ModelViewSet):
     serializer_class = MedicineInstanceSerializer
@@ -267,7 +359,7 @@ class ModeratorRequestViewSet(viewsets.ViewSet):
             target_profile.save()
         return Response(ModeratorRequestSerializer(mod_request).data)
     
-    
+
 class MedicineSubmissionViewSet(viewsets.ModelViewSet):
     serializer_class = MedicineSubmissionSerializer
     authentication_classes = [TokenAuthentication]

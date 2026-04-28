@@ -1,14 +1,17 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { getUserRole } from '@/app/lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Medicines() {
   const [medicines, setMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState('user');
 
   useEffect(() => {
     fetchMedicines();
+    getUserRole().then(setUserRole);
   }, []);
 
   async function fetchMedicines() {
@@ -69,14 +72,16 @@ export default function Medicines() {
                     ))}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <a href={`/medicines/edit/${med.id}`} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-400">
-                    تعديل
-                  </a>
-                  <button onClick={() => handleDelete(med.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500">
-                    حذف
-                  </button>
-                </div>
+                {(userRole === 'moderator' || userRole === 'admin') && (
+                  <div className="flex gap-2">
+                    <a href={`/medicines/edit/${med.id}`} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-400">
+                      تعديل
+                    </a>
+                    <button onClick={() => handleDelete(med.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500">
+                      حذف
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

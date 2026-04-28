@@ -1,14 +1,18 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { getUserRole } from '@/app/lib/api';
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Conditions() {
   const [conditions, setConditions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState('user');
 
   useEffect(() => {
     fetchConditions();
+    getUserRole().then(setUserRole);
   }, []);
 
   async function fetchConditions() {
@@ -48,11 +52,13 @@ export default function Conditions() {
                 <div>
                   <h3 className="font-bold text-lg">{condition.name}</h3>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => handleDelete(condition.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500">
-                    حذف
-                  </button>
-                </div>
+                {(userRole === 'moderator' || userRole === 'admin') && (
+                  <div className="flex gap-2">
+                    <button onClick={() => handleDelete(condition.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500">
+                      حذف
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -7,12 +7,15 @@ import { usePathname, useRouter } from 'next/navigation';
 const staticNavItems = [
   { href: '/', label: 'الرئيسية', icon: '🏠' },
   { href: '/families', label: 'العائلات', icon: '👨‍👩‍👧‍👦' },
-  { href: '/medicines', label: 'الأدوية', icon: '💊' },
   { href: '/inventory', label: 'المخزون', icon: '📦' },
   { href: '/inventory/search', label: 'بحث ذكي', icon: '🔍' },
-  { href: '/conditions', label: 'الحالات', icon: '🏥' },
   { href: '/activity', label: 'سجل النشاط', icon: '📋' },
   { href: '/reminders', label: 'التذكيرات', icon: '⏰' },
+];
+
+const modNavItems = [
+  { href: '/medicines', label: 'الأدوية', icon: '💊' },
+  { href: '/conditions', label: 'الحالات', icon: '🏥' },
 ];
 
 export default function DrawerLayout({ children }) {
@@ -174,6 +177,27 @@ export default function DrawerLayout({ children }) {
               );
             })}
 
+            {(userRole === 'moderator' || userRole === 'admin') &&
+              modNavItems.map(({ href, label, icon }) => {
+                const active = pathname === href;
+                return (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+                        active
+                          ? 'bg-white text-blue-900 shadow'
+                          : 'hover:bg-blue-800 text-blue-100'
+                      }`}
+                    >
+                      <span className="text-xl">{icon}</span>
+                      <span>{label}</span>
+                    </Link>
+                  </li>
+                );
+              })
+            }
+
             {(userRole === 'moderator' || userRole === 'admin') && (
               <li>
                 <Link
@@ -205,7 +229,7 @@ export default function DrawerLayout({ children }) {
                 </Link>
               </li>
             )}
-            
+
             <li>
               <button
                 onClick={handleSignOut}
