@@ -57,6 +57,33 @@ class Medicine(models.Model):
     def __str__(self):
         return self.name_ar
 
+class MedicineSubmission(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'قيد المراجعة'),
+        ('approved', 'مقبول'),
+        ('rejected', 'مرفوض'),
+    ]
+    submitted_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
+    name_ar = models.CharField(max_length=200)
+    name_en = models.CharField(max_length=200, blank=True)
+    form = models.CharField(max_length=20, choices=Medicine.FORM_CHOICES, default='tablet')
+    shelf_life_months = models.PositiveIntegerField()
+    shelf_life_after_opening_months = models.PositiveIntegerField()
+    safe_during_pregnancy = models.BooleanField(default=False)
+    safe_during_breastfeeding = models.BooleanField(default=False)
+    safe_for_diabetics = models.BooleanField(default=False)
+    safe_for_hypertensive = models.BooleanField(default=False)
+    conditions = models.ManyToManyField(Condition, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    reviewer = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_submissions'
+    )
+    review_note = models.TextField(blank=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name_ar} - {self.status}"
 
 class Family(models.Model):
     name = models.CharField(max_length=200)

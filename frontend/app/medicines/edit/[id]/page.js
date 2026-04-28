@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { getAuthHeaders } from '@/app/lib/api';
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -11,6 +13,7 @@ export default function EditMedicine({ params }) {
   const [newCondition, setNewCondition] = useState('');
   const [showNewCondition, setShowNewCondition] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     name_ar: '',
     name_en: '',
@@ -77,12 +80,31 @@ export default function EditMedicine({ params }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    await fetch(`${API_URL}/api/medicines/${id}/`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch(`${API_URL}/api/submissions/`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
       body: JSON.stringify(form),
     });
-    router.push('/medicines');
+    if (res.ok) {
+      setLoading(false);
+      setSubmitted(true);
+    } else {
+      setLoading(false);
+      alert('حدث خطأ، حاول مرة أخرى');
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-16">
+        <div className="text-6xl mb-4">✅</div>
+        <h2 className="text-2xl font-bold text-blue-900 mb-2">تم إرسال الطلب</h2>
+        <p className="text-gray-500 mb-6">سيتم مراجعة الدواء من قبل المشرفين قبل إضافته للكتالوج</p>
+        <a href="/medicines" className="bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800">
+          العودة للأدوية
+        </a>
+      </div>
+    );
   }
 
   return (

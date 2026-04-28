@@ -1,12 +1,13 @@
 from rest_framework import viewsets, status
+from django.utils import timezone
 from django.db import transaction
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
-from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile
-from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer
+from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission
+from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer, MedicineSubmissionSerializer
 
 def get_user_family(request):
     """Get family_id from query param and verify membership."""
@@ -174,3 +175,57 @@ class UserProfileViewSet(viewsets.ViewSet):
             return Response(UserProfileSerializer(target_profile).data)
         except UserProfile.DoesNotExist:
             return Response({'error': 'المستخدم غير موجود'}, status=404)
+        
+class MedicineSubmissionViewSet(viewsets.ModelViewSet):
+    serializer_class = MedicineSubmissionSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
+        if profile.role in ['moderator', 'admin']:
+            status_filter = self.request.query_params.get('status')
+            if status_filter:
+                return MedicineSubmission.objects.filter(status=status_filter).order_by('-submitted_at')
+            return MedicineSubmission.objects.all().order_by('-submitted_at')
+        return MedicineSubmission.objects.filter(submitted_by=self.request.user).order_by('-submitted_at')
+
+    def perform_create(self, serializer):
+        serializer.save(submitted_by=self.request.user)
+
+    @action(detail=True, methods=['patch'], url_path='review')
+    def review(self, request, pk=None):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if profile.role not in ['moderator', 'admin']:
+            return Response({'error': 'غير مصرح'}, status=403)
+
+        submission = self.get_object()
+        if submission.status != 'pending':
+            return Response({'error': 'تم مراجعة هذا الطلب مسبقاً'}, status=400)
+
+        new_status = request.data.get('status')
+        if new_status not in ['approved', 'rejected']:
+            return Response({'error': 'حالة غير صحيحة'}, status=400)
+
+        review_note = request.data.get('review_note', '')
+        submission.status = new_status
+        submission.reviewer = request.user
+        submission.review_note = review_note
+        submission.reviewed_at = timezone.now()
+        submission.save()
+
+        if new_status == 'approved':
+            medicine = Medicine.objects.create(
+                name_ar=submission.name_ar,
+                name_en=submission.name_en,
+                form=submission.form,
+                shelf_life_months=submission.shelf_life_months,
+                shelf_life_after_opening_months=submission.shelf_life_after_opening_months,
+                safe_during_pregnancy=submission.safe_during_pregnancy,
+                safe_during_breastfeeding=submission.safe_during_breastfeeding,
+                safe_for_diabetics=submission.safe_for_diabetics,
+                safe_for_hypertensive=submission.safe_for_hypertensive,
+            )
+            medicine.conditions.set(submission.conditions.all())
+
+        return Response(MedicineSubmissionSerializer(submission).data)

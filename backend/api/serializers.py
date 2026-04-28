@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile
+from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission
 
 class ConditionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,6 +21,19 @@ class MedicineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Medicine
         fields = '__all__'
+
+class MedicineSubmissionSerializer(serializers.ModelSerializer):
+    submitted_by = UserSerializer(read_only=True)
+    reviewer = UserSerializer(read_only=True)
+    conditions = ConditionSerializer(many=True, read_only=True)
+    condition_ids = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Condition.objects.all(), source='conditions', write_only=True, required=False
+    )
+
+    class Meta:
+        model = MedicineSubmission
+        fields = '__all__'
+        read_only_fields = ['submitted_by', 'reviewer', 'status', 'reviewed_at']
 
 class MedicineInstanceSerializer(serializers.ModelSerializer):
     medicine = MedicineSerializer(read_only=True)

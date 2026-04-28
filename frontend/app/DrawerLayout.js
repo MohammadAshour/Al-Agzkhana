@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
+import { getUserRole } from '@/app/lib/api';
 
+
+const [userRole, setUserRole] = useState('user');
 const staticNavItems = [
   { href: '/', label: 'الرئيسية', icon: '🏠' },
   { href: '/families', label: 'العائلات', icon: '👨‍👩‍👧‍👦' },
@@ -14,6 +17,7 @@ const staticNavItems = [
   { href: '/profile', label: 'الملف الشخصي', icon: '👤' },
 
 ];
+
 
 export default function DrawerLayout({ children }) {
   const [open, setOpen] = useState(false);
@@ -43,6 +47,11 @@ export default function DrawerLayout({ children }) {
       router.push('/auth/login');
     }
   }, [status, pathname, router]);
+
+  
+useEffect(() => {
+    getUserRole().then(setUserRole);
+  }, [status]);
 
   // Show nothing while checking auth (except on login page)
   if (status === 'loading') {
@@ -147,6 +156,22 @@ export default function DrawerLayout({ children }) {
                 </li>
               );
             })}
+
+            {(userRole === 'moderator' || userRole === 'admin') && (
+              <li>
+                <Link
+                  href="/moderation"
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+                    pathname === '/moderation'
+                      ? 'bg-white text-blue-900 shadow'
+                      : 'hover:bg-blue-800 text-blue-100'
+                  }`}
+                >
+                  <span className="text-xl">🛡️</span>
+                  <span>المراجعة</span>
+                </Link>
+              </li>
+            )}
 
             {/* Sign out button */}
             <li>
