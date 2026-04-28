@@ -114,6 +114,7 @@ class ActivityLog(models.Model):
     def __str__(self):
         return f"{self.user.email} - {self.action} - {self.medicine_name}"
 
+
 class FamilyMembership(models.Model):
     family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name='memberships')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='family_memberships')
@@ -157,3 +158,19 @@ class MedicineInstance(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.get_or_create(user=instance)
+
+class Reminder(models.Model):
+    SCHEDULE_CHOICES = [
+        ('fixed_times', 'أوقات محددة'),
+        ('interval', 'كل فترة'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reminders')
+    medicine_instance = models.ForeignKey(MedicineInstance, on_delete=models.CASCADE, related_name='reminders')
+    schedule_type = models.CharField(max_length=20, choices=SCHEDULE_CHOICES)
+    times = models.JSONField()
+    dosage = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.medicine_instance.medicine.name_ar}"

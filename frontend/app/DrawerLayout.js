@@ -11,6 +11,7 @@ const staticNavItems = [
   { href: '/inventory', label: 'المخزون', icon: '📦' },
   { href: '/conditions', label: 'الحالات', icon: '🏥' },
   { href: '/activity', label: 'سجل النشاط', icon: '📋' },
+  { href: '/reminders', label: 'التذكيرات', icon: '⏰' },
 ];
 
 export default function DrawerLayout({ children }) {

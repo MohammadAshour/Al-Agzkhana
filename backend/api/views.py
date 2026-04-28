@@ -9,8 +9,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 
 
-from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission, ActivityLog
-from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer, MedicineSubmissionSerializer, ActivityLogSerializer
+from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission, ActivityLog, Reminder
+from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer, MedicineSubmissionSerializer, ActivityLogSerializer, ReminderSerializer
 
 def get_user_family(request):
     """Get family_id from query param and verify membership."""
@@ -290,3 +290,21 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
             family_id=family_id,
             timestamp__gte=cutoff,
         ).select_related('user')
+    
+class ReminderViewSet(viewsets.ModelViewSet):
+    serializer_class = ReminderSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Reminder.objects.filter(user=self.request.user).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['patch'], url_path='toggle')
+    def toggle(self, request, pk=None):
+        reminder = self.get_object()
+        reminder.is_active = not reminder.is_active
+        reminder.save()
+        return Response(ReminderSerializer(reminder).data)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import ActivityLog, Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission
+from .models import ActivityLog, Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, Reminder, UserProfile, MedicineSubmission
 
 class ConditionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -82,3 +82,14 @@ class FamilySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'code', 'owner', 'memberships', 'member_count', 'created_at']
     def get_member_count(self, obj):
         return obj.memberships.count()
+    
+class ReminderSerializer(serializers.ModelSerializer):
+    medicine_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Reminder
+        fields = '__all__'
+        read_only_fields = ['user']
+
+    def get_medicine_name(self, obj):
+        return obj.medicine_instance.medicine.name_ar
