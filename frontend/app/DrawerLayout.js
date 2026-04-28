@@ -190,6 +190,22 @@ export default function DrawerLayout({ children }) {
               </li>
             )}
 
+            {userRole === 'admin' && (
+              <li>
+                <Link
+                  href="/admin"
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+                    pathname === '/admin'
+                      ? 'bg-white text-blue-900 shadow'
+                      : 'hover:bg-blue-800 text-blue-100'
+                  }`}
+                >
+                  <span className="text-xl">⚙️</span>
+                  <span>الإدارة</span>
+                </Link>
+              </li>
+            )}
+            
             <li>
               <button
                 onClick={handleSignOut}

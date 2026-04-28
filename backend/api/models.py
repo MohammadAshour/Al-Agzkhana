@@ -37,6 +37,23 @@ class UserProfile(models.Model):
         return f"{self.user.email} - {self.role}"
 
 
+class ModeratorRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'قيد المراجعة'),
+        ('approved', 'مقبول'),
+        ('rejected', 'مرفوض'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='moderator_requests')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    reviewed_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_moderator_requests'
+    )
+    requested_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.status}"
+
 def generate_family_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 

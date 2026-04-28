@@ -9,6 +9,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
   const [users, setUsers] = useState([]);
+  const [requestStatus, setRequestStatus] = useState(null);
+
 
   useEffect(() => {
     fetchProfile();
@@ -22,6 +24,33 @@ export default function ProfilePage() {
     const p = Array.isArray(data) ? data[0] : data;
     setProfile(p);
     setLoading(false);
+    // Check pending request status
+    if (p?.role === 'user') {
+      checkPendingRequest();
+    }
+  }
+
+  async function checkPendingRequest() {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+      // We store the request status in localStorage as a simple flag
+      const stored = localStorage.getItem('moderatorRequestSent');
+      if (stored) setRequestStatus('pending');
+    } catch { }
+  }
+
+  async function fetchRequestStatus() {
+    const res = await fetch(`${API_URL}/api/moderator-requests/?status=pending`, {
+      headers: await getAuthHeaders(),
+    });
+    // This will 403 for non-admins, that's fine
+    if (res.ok) {
+      const data = await res.json();
+      // Check if current user has a pending request
+      const mine = data.find(r => r.user?.email === profile?.user?.email);
+      setRequestStatus(mine ? 'pending' : null);
+    }
   }
 
   async function requestModerator() {
@@ -30,6 +59,10 @@ export default function ProfilePage() {
       headers: await getAuthHeaders(),
     });
     const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem('moderatorRequestSent', 'true');
+      setRequestStatus('pending');
+    }
     setMsg(data.message || data.error || '');
   }
 
@@ -73,12 +106,18 @@ export default function ProfilePage() {
 
           {profile.role === 'user' && (
             <div className="mt-6">
-              <button
-                onClick={requestModerator}
-                className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800"
-              >
-                طلب صلاحية مشرف
-              </button>
+              {requestStatus === 'pending' ? (
+                <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded">
+                  ⏳ طلبك قيد المراجعة من قبل المدير
+                </div>
+              ) : (
+                <button
+                  onClick={requestModerator}
+                  className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800"
+                >
+                  طلب صلاحية مشرف
+                </button>
+              )}
             </div>
           )}
         </div>

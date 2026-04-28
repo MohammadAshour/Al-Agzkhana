@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import ActivityLog, DeviceToken, Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, Reminder, UserProfile, MedicineSubmission
+from .models import ActivityLog, DeviceToken, Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, ModeratorRequest, Reminder, UserProfile, MedicineSubmission
 
 class ConditionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -78,6 +78,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['id', 'user', 'role']
+
+class ModeratorRequestSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    reviewed_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ModeratorRequest
+        fields = '__all__'
+
 class FamilyMembershipSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     class Meta:

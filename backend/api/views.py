@@ -9,8 +9,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 
 
-from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission, ActivityLog, Reminder, DeviceToken
-from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer, MedicineSubmissionSerializer, ActivityLogSerializer, ReminderSerializer, DeviceTokenSerializer
+from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission, ActivityLog, Reminder, DeviceToken, ModeratorRequest
+from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer, ModeratorRequestSerializer, MedicineSubmissionSerializer, ActivityLogSerializer, ReminderSerializer, DeviceTokenSerializer
 
 def get_user_family(request):
     """Get family_id from query param and verify membership."""
@@ -202,7 +202,13 @@ class UserProfileViewSet(viewsets.ViewSet):
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
         if profile.role != 'user':
             return Response({'error': 'أنت بالفعل مشرف أو مدير'}, status=400)
-        # Flag it — admin will promote via promote endpoint
+        # Check if there's already a pending request
+        existing = ModeratorRequest.objects.filter(
+            user=request.user, status='pending'
+        ).first()
+        if existing:
+            return Response({'error': 'لديك طلب قيد المراجعة بالفعل'}, status=400)
+        ModeratorRequest.objects.create(user=request.user)
         return Response({'message': 'تم إرسال طلب الترقية، سيتم مراجعته قريباً'})
 
     @action(detail=False, methods=['patch'], url_path='promote')
@@ -222,6 +228,46 @@ class UserProfileViewSet(viewsets.ViewSet):
         except UserProfile.DoesNotExist:
             return Response({'error': 'المستخدم غير موجود'}, status=404)
         
+
+class ModeratorRequestViewSet(viewsets.ViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if profile.role != 'admin':
+            return Response({'error': 'غير مصرح'}, status=403)
+        status_filter = request.query_params.get('status', 'pending')
+        requests = ModeratorRequest.objects.filter(
+            status=status_filter
+        ).select_related('user', 'reviewed_by').order_by('-requested_at')
+        return Response(ModeratorRequestSerializer(requests, many=True).data)
+
+    @action(detail=True, methods=['patch'], url_path='review')
+    def review(self, request, pk=None):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if profile.role != 'admin':
+            return Response({'error': 'غير مصرح'}, status=403)
+        try:
+            mod_request = ModeratorRequest.objects.get(pk=pk)
+        except ModeratorRequest.DoesNotExist:
+            return Response({'error': 'الطلب غير موجود'}, status=404)
+        if mod_request.status != 'pending':
+            return Response({'error': 'تم مراجعة هذا الطلب مسبقاً'}, status=400)
+        new_status = request.data.get('status')
+        if new_status not in ['approved', 'rejected']:
+            return Response({'error': 'حالة غير صحيحة'}, status=400)
+        mod_request.status = new_status
+        mod_request.reviewed_by = request.user
+        mod_request.reviewed_at = timezone.now()
+        mod_request.save()
+        if new_status == 'approved':
+            target_profile, _ = UserProfile.objects.get_or_create(user=mod_request.user)
+            target_profile.role = 'moderator'
+            target_profile.save()
+        return Response(ModeratorRequestSerializer(mod_request).data)
+    
+    
 class MedicineSubmissionViewSet(viewsets.ModelViewSet):
     serializer_class = MedicineSubmissionSerializer
     authentication_classes = [TokenAuthentication]
