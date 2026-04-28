@@ -17,6 +17,8 @@ export default function AddMedicine() {
     shelf_life_after_opening_months: '',
     safe_during_pregnancy: false,
     safe_during_breastfeeding: false,
+    safe_for_diabetics: false,
+    safe_for_hypertensive: false,
     condition_ids: [],
   });
 
