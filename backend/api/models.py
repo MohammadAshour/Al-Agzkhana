@@ -5,6 +5,24 @@ from dateutil.relativedelta import relativedelta
 import random, string
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import re
+
+def normalize_arabic(text):
+    """Normalize Arabic text for comparison — removes tashkeel, normalizes alef, taa marbuta, and strips ال."""
+    text = text.strip()
+    # Remove tashkeel (diacritics)
+    text = re.sub(r'[\u0610-\u061A\u064B-\u065F]', '', text)
+    # Normalize alef variations to bare alef
+    text = re.sub(r'[إأآا]', 'ا', text)
+    # Normalize taa marbuta and haa to same
+    text = re.sub(r'[ةه]', 'ه', text)
+    # Normalize yaa variations
+    text = re.sub(r'[يى]', 'ي', text)
+    # Strip definite article ال from beginning of each word
+    text = re.sub(r'\bال', '', text)
+    # Clean up any extra spaces left after stripping
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text.lower()
 
 class UserProfile(models.Model):
     ROLE_CHOICES = [
@@ -25,6 +43,11 @@ def generate_family_code():
 
 class Condition(models.Model):
     name = models.CharField(max_length=200)
+    normalized_name = models.CharField(max_length=200, blank=True, db_index=True)
+
+    def save(self, *args, **kwargs):
+        self.normalized_name = normalize_arabic(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

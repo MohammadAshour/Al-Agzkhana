@@ -7,6 +7,16 @@ class ConditionSerializer(serializers.ModelSerializer):
         model = Condition
         fields = '__all__'
 
+    def create(self, validated_data):
+        from .models import normalize_arabic
+        normalized = normalize_arabic(validated_data['name'])
+        existing = Condition.objects.filter(normalized_name=normalized).first()
+        if existing:
+            raise serializers.ValidationError({
+                'name': f'هذا العرض موجود بالفعل باسم "{existing.name}"'
+            })
+        return super().create(validated_data)
+
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location

@@ -55,14 +55,48 @@ export default function EditMedicine({ params }) {
     });
   }
 
+  function normalizeArabic(text) {
+    return text
+      .trim()
+      .replace(/[\u0610-\u061A\u064B-\u065F]/g, '')
+      .replace(/[إأآا]/g, 'ا')
+      .replace(/[ةه]/g, 'ه')
+      .replace(/[يى]/g, 'ي')
+      .replace(/\bال/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
   async function addNewCondition() {
     if (!newCondition.trim()) return;
+
+    // Client-side duplicate check
+    const normalized = normalizeArabic(newCondition);
+    const duplicate = conditions.find(c => normalizeArabic(c.name) === normalized);
+    if (duplicate) {
+      alert(`هذا العرض موجود بالفعل باسم "${duplicate.name}"`);
+      if (!form.condition_ids.includes(duplicate.id)) {
+        setForm({ ...form, condition_ids: [...form.condition_ids, duplicate.id] });
+      }
+      setNewCondition('');
+      setShowNewCondition(false);
+      return;
+    }
+
     const res = await fetch(`${API_URL}/api/conditions/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newCondition }),
     });
     const data = await res.json();
+
+    if (!res.ok) {
+      const errorMsg = data?.name?.[0] || data?.detail || 'حدث خطأ';
+      alert(errorMsg);
+      return;
+    }
+
     setConditions([...conditions, data]);
     setForm({ ...form, condition_ids: [...form.condition_ids, data.id] });
     setNewCondition('');
