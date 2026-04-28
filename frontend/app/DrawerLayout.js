@@ -11,6 +11,8 @@ const staticNavItems = [
   { href: '/medicines', label: 'الأدوية', icon: '💊' },
   { href: '/inventory', label: 'المخزون', icon: '📦' },
   { href: '/conditions', label: 'الحالات', icon: '🏥' },
+  { href: '/profile', label: 'الملف الشخصي', icon: '👤' },
+
 ];
 
 export default function DrawerLayout({ children }) {

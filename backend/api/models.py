@@ -3,6 +3,21 @@ from django.contrib.auth.models import User
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import random, string
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ('user', 'مستخدم'),
+        ('moderator', 'مشرف'),
+        ('admin', 'مدير'),
+    ]
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
+
+    def __str__(self):
+        return f"{self.user.email} - {self.role}"
+
 
 def generate_family_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
@@ -76,7 +91,7 @@ class MedicineInstance(models.Model):
     family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name='instances', null=True)
     quantity = models.PositiveIntegerField(default=1)
     min_threshold = models.PositiveIntegerField(default=1)
-    
+
     @property
     def expiry_date(self):
         full_expiry = self.production_date + relativedelta(months=self.medicine.shelf_life_months)
@@ -91,3 +106,8 @@ class MedicineInstance(models.Model):
 
     def __str__(self):
         return f"{self.medicine.name_ar} - {self.location}"
+    
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.get_or_create(user=instance)

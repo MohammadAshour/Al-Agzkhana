@@ -5,8 +5,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
-from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership
-from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer
+from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile
+from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer
 
 def get_user_family(request):
     """Get family_id from query param and verify membership."""
@@ -140,3 +140,37 @@ class FamilyViewSet(viewsets.ModelViewSet):
         user_id = request.data.get('user_id')
         FamilyMembership.objects.filter(family=family, user_id=user_id).delete()
         return Response(status=204)
+    
+class UserProfileViewSet(viewsets.ViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], url_path='request-moderator')
+    def request_moderator(self, request):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if profile.role != 'user':
+            return Response({'error': 'أنت بالفعل مشرف أو مدير'}, status=400)
+        # Flag it — admin will promote via promote endpoint
+        return Response({'message': 'تم إرسال طلب الترقية، سيتم مراجعته قريباً'})
+
+    @action(detail=False, methods=['patch'], url_path='promote')
+    def promote(self, request):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if profile.role != 'admin':
+            return Response({'error': 'غير مصرح'}, status=403)
+        target_user_id = request.data.get('user_id')
+        new_role = request.data.get('role')
+        if new_role not in ['user', 'moderator', 'admin']:
+            return Response({'error': 'دور غير صحيح'}, status=400)
+        try:
+            target_profile = UserProfile.objects.get(user_id=target_user_id)
+            target_profile.role = new_role
+            target_profile.save()
+            return Response(UserProfileSerializer(target_profile).data)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'المستخدم غير موجود'}, status=404)
