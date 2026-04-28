@@ -11,7 +11,6 @@ const staticNavItems = [
   { href: '/inventory', label: 'المخزون', icon: '📦' },
   { href: '/conditions', label: 'الحالات', icon: '🏥' },
   { href: '/activity', label: 'سجل النشاط', icon: '📋' },
-  { href: '/profile', label: 'الملف الشخصي', icon: '👤' },
 ];
 
 export default function DrawerLayout({ children }) {
@@ -134,7 +133,7 @@ export default function DrawerLayout({ children }) {
         </div>
 
         {session?.user && (
-          <div className="px-5 py-3 border-b border-blue-700 flex items-center gap-3">
+          <Link href="/profile" className="px-5 py-3 border-b border-blue-700 flex items-center gap-3">
             {session.user.image && (
               <img
                 src={session.user.image}
@@ -146,7 +145,7 @@ export default function DrawerLayout({ children }) {
               <p className="text-sm font-semibold truncate">{session.user.name}</p>
               <p className="text-xs text-blue-300 truncate">{session.user.email}</p>
             </div>
-          </div>
+          </Link>
         )}
 
         <nav className="flex-1 overflow-y-auto py-4 px-3">
