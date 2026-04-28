@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from django.db import transaction
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
@@ -75,6 +76,23 @@ class MedicineInstanceViewSet(viewsets.ModelViewSet):
         family_id = self.request.data.get('family_id')
         family = Family.objects.get(id=family_id)
         serializer.save(family=family)
+
+    @action(detail=True, methods=['post'], url_path='deduct')
+    def deduct(self, request, pk=None):
+        with transaction.atomic():
+            instance = MedicineInstance.objects.select_for_update().get(pk=pk)
+            quantity = int(request.data.get('quantity', 1))
+            if quantity <= 0:
+                return Response({'error': 'الكمية يجب أن تكون أكبر من صفر'}, status=400)
+            if instance.quantity < quantity:
+                return Response({'error': f'الكمية المتاحة {instance.quantity} فقط'}, status=400)
+            instance.quantity -= quantity
+            instance.save()
+            return Response({
+                'id': instance.id,
+                'quantity': instance.quantity,
+                'low_stock': instance.quantity <= instance.min_threshold,
+            })
 
 class FamilyViewSet(viewsets.ModelViewSet):
     serializer_class = FamilySerializer

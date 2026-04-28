@@ -41,6 +41,20 @@ function InventoryContent() {
     fetchInstances();
   }
 
+  async function handleDeduct(id) {
+    const res = await fetch(`${API_URL}/api/instances/${id}/deduct/`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ quantity: 1 }),
+    });
+    if (res.ok) {
+      fetchInstances();
+    } else {
+      const data = await res.json();
+      alert(data.error || 'خطأ في خصم الجرعة');
+    }
+  }
+
   function getStatusColor(instance) {
     if (instance.is_expired) return 'bg-red-100 border-red-400';
     const today = new Date();
@@ -96,11 +110,18 @@ function InventoryContent() {
                   {instance.open_date && <p className="text-sm text-gray-600">تاريخ الفتح: {instance.open_date}</p>}
                   <p className="mt-2">{getStatusText(instance)}</p>
                 </div>
-                <div className="flex gap-2">
-                  <a href={`/inventory/edit/${instance.id}`} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-400">
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => handleDeduct(instance.id)}
+                    disabled={instance.quantity === 0 || instance.is_expired}
+                    className="bg-blue-900 text-white px-3 py-1 rounded hover:bg-blue-800 disabled:opacity-40 text-sm"
+                  >
+                    💊 أخذ جرعة
+                  </button>
+                  <a href={`/inventory/edit/${instance.id}`} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-400 text-sm text-center">
                     تعديل
                   </a>
-                  <button onClick={() => handleDelete(instance.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500">
+                  <button onClick={() => handleDelete(instance.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500 text-sm">
                     حذف
                   </button>
                 </div>
