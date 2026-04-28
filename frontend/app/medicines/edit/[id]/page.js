@@ -14,10 +14,13 @@ export default function EditMedicine({ params }) {
   const [form, setForm] = useState({
     name_ar: '',
     name_en: '',
+    form: '',
     shelf_life_months: '',
     shelf_life_after_opening_months: '',
     safe_during_pregnancy: false,
     safe_during_breastfeeding: false,
+    safe_for_diabetics: false,
+    safe_for_hypertensive: false,
     condition_ids: [],
   });
 
@@ -38,6 +41,7 @@ export default function EditMedicine({ params }) {
     setForm({
       name_ar: data.name_ar,
       name_en: data.name_en || '',
+      form: data.form || 'tablet',
       shelf_life_months: data.shelf_life_months,
       shelf_life_after_opening_months: data.shelf_life_after_opening_months,
       safe_during_pregnancy: data.safe_during_pregnancy,
@@ -96,6 +100,23 @@ export default function EditMedicine({ params }) {
           <label className="block text-sm font-medium mb-1">الاسم بالإنجليزي</label>
           <input value={form.name_en} onChange={e => setForm({...form, name_en: e.target.value})}
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">شكل الدواء *</label>
+          <select required value={form.form} onChange={e => setForm({...form, form: e.target.value})}
+            className="w-full border rounded-lg px-4 py-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="tablet">قرص</option>
+            <option value="capsule">كبسولة</option>
+            <option value="syrup">شراب</option>
+            <option value="drops">قطرة</option>
+            <option value="cream">كريم</option>
+            <option value="injection">حقنة</option>
+            <option value="inhaler">بخاخ</option>
+            <option value="suppository">تحميلة</option>
+            <option value="patch">لصقة</option>
+            <option value="other">أخرى</option>
+          </select>
         </div>
 
         <div>

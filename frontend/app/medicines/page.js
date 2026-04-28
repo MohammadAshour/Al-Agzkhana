@@ -45,6 +45,11 @@ export default function Medicines() {
                 <div>
                   <h3 className="font-bold text-lg">{med.name_ar}</h3>
                   {med.name_en && <p className="text-gray-500">{med.name_en}</p>}
+                  <p className="text-sm text-gray-600">شكل الدواء: {{
+                    tablet: 'قرص', capsule: 'كبسولة', syrup: 'شراب', drops: 'قطرة',
+                    cream: 'كريم', injection: 'حقنة', inhaler: 'بخاخ',
+                    suppository: 'تحميلة', patch: 'لصقة', other: 'أخرى'
+                  }[med.form] || med.form}</p>
                   <p className="text-sm text-gray-600 mt-1">مدة الصلاحية: {med.shelf_life_months} شهر</p>
                   <p className="text-sm text-gray-600">مدة الصلاحية بعد الفتح: {med.shelf_life_after_opening_months} شهر</p>
                   <p className="text-sm mt-1">

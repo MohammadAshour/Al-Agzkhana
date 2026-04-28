@@ -13,6 +13,7 @@ export default function AddMedicine() {
   const [form, setForm] = useState({
     name_ar: '',
     name_en: '',
+    form: 'tablet',
     shelf_life_months: '',
     shelf_life_after_opening_months: '',
     safe_during_pregnancy: false,
@@ -75,11 +76,27 @@ export default function AddMedicine() {
           <input required value={form.name_ar} onChange={e => setForm({...form, name_ar: e.target.value})}
             className="w-full border rounded-lg px-4 py-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
-
+        
         <div>
           <label className="block text-sm font-medium mb-1">الاسم بالإنجليزي</label>
           <input value={form.name_en} onChange={e => setForm({...form, name_en: e.target.value})}
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <div>
+            <label className="block text-sm font-medium mb-1">شكل الدواء *</label>
+            <select required value={form.form} onChange={e => setForm({...form, form: e.target.value})}
+              className="w-full border rounded-lg px-4 py-2 text-right focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="tablet">قرص</option>
+              <option value="capsule">كبسولة</option>
+              <option value="syrup">شراب</option>
+              <option value="drops">قطرة</option>
+              <option value="cream">كريم</option>
+              <option value="injection">حقنة</option>
+              <option value="inhaler">بخاخ</option>
+              <option value="suppository">تحميلة</option>
+              <option value="patch">لصقة</option>
+              <option value="other">أخرى</option>
+            </select>
+          </div>
         </div>
 
         <div>

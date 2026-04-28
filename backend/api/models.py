@@ -18,6 +18,19 @@ class Condition(models.Model):
 class Medicine(models.Model):
     name_ar = models.CharField(max_length=200)
     name_en = models.CharField(max_length=200, blank=True)
+    FORM_CHOICES = [
+    ('tablet', 'قرص'),
+    ('capsule', 'كبسولة'),
+    ('syrup', 'شراب'),
+    ('drops', 'قطرة'),
+    ('cream', 'كريم'),
+    ('injection', 'حقنة'),
+    ('inhaler', 'بخاخ'),
+    ('suppository', 'تحميلة'),
+    ('patch', 'لصقة'),
+    ('other', 'أخرى'),
+    ]
+    form = models.CharField(max_length=20, choices=FORM_CHOICES, default='other')
     shelf_life_months = models.PositiveIntegerField()
     shelf_life_after_opening_months = models.PositiveIntegerField()
     conditions = models.ManyToManyField(Condition)
@@ -54,7 +67,7 @@ class Location(models.Model):
     def __str__(self):
         return self.name
         
-        
+
 class MedicineInstance(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     production_date = models.DateField()
@@ -65,7 +78,7 @@ class MedicineInstance(models.Model):
     @property
     def expiry_date(self):
         full_expiry = self.production_date + relativedelta(months=self.medicine.shelf_life_months)
-        if self.open_date:
+        if self.open_date and self.medicine.form in ['syrup', 'drops']:
             open_expiry = self.open_date + relativedelta(months=self.medicine.shelf_life_after_opening_months)
             return min(full_expiry, open_expiry)
         return full_expiry
