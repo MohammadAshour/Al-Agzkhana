@@ -22,6 +22,11 @@ class MedicineSerializer(serializers.ModelSerializer):
         model = Medicine
         fields = '__all__'
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name']
+
 class MedicineSubmissionSerializer(serializers.ModelSerializer):
     submitted_by = UserSerializer(read_only=True)
     reviewer = UserSerializer(read_only=True)
@@ -50,11 +55,6 @@ class MedicineInstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicineInstance
         fields = '__all__'
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'email', 'first_name', 'last_name']
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
