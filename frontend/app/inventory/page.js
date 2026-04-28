@@ -46,7 +46,7 @@ function InventoryContent() {
     const today = new Date();
     const expiry = new Date(instance.expiry_date);
     const daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-    if (daysLeft <= 30) return 'bg-yellow-100 border-yellow-400';
+    if (daysLeft <= 90) return 'bg-yellow-100 border-yellow-400';
     return 'bg-white border-gray-200';
   }
 
@@ -55,7 +55,7 @@ function InventoryContent() {
     const today = new Date();
     const expiry = new Date(instance.expiry_date);
     const daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-    if (daysLeft <= 30) return <span className="text-yellow-600 font-bold">⚠️ ينتهي خلال {daysLeft} يوم</span>;
+    if (daysLeft <= 90) return <span className="text-yellow-600 font-bold">⚠️ ينتهي خلال {daysLeft} يوم</span>;
     return <span className="text-green-600">✅ صالح حتى {instance.expiry_date}</span>;
   }
 
