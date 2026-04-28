@@ -94,6 +94,25 @@ class Family(models.Model):
     def __str__(self):
         return self.name
 
+class ActivityLog(models.Model):
+    ACTION_CHOICES = [
+        ('add_inventory', 'إضافة للمخزون'),
+        ('edit_inventory', 'تعديل المخزون'),
+        ('delete_inventory', 'حذف من المخزون'),
+        ('deduct_dose', 'أخذ جرعة'),
+    ]
+    family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name='activity_logs')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activity_logs')
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    medicine_name = models.CharField(max_length=200)
+    details = models.JSONField(default=dict)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.action} - {self.medicine_name}"
 
 class FamilyMembership(models.Model):
     family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name='memberships')

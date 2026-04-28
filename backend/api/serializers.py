@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission
+from .models import ActivityLog, Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission
 
 class ConditionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,6 +54,13 @@ class MedicineInstanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MedicineInstance
+        fields = '__all__'
+
+class ActivityLogSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ActivityLog
         fields = '__all__'
 
 class UserProfileSerializer(serializers.ModelSerializer):

@@ -1,13 +1,16 @@
 from rest_framework import viewsets, status
 from django.utils import timezone
 from django.db import transaction
+from datetime import timedelta
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
-from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission
-from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer, MedicineSubmissionSerializer
+
+
+from .models import Medicine, MedicineInstance, Condition, Location, Family, FamilyMembership, UserProfile, MedicineSubmission, ActivityLog
+from .serializers import MedicineSerializer, MedicineInstanceSerializer, ConditionSerializer, LocationSerializer, FamilySerializer, UserProfileSerializer, MedicineSubmissionSerializer, ActivityLogSerializer
 
 def get_user_family(request):
     """Get family_id from query param and verify membership."""
@@ -23,6 +26,15 @@ def get_user_family(request):
     if not (is_member or is_owner):
         return None, Response({'error': 'Not a member of this family'}, status=403)
     return family, None
+
+def log_activity(user, family, action, medicine_name, details=None):
+    ActivityLog.objects.create(
+        user=user,
+        family=family,
+        action=action,
+        medicine_name=medicine_name,
+        details=details or {},
+    )
 
 class ConditionViewSet(viewsets.ModelViewSet):
     queryset = Condition.objects.all()
@@ -76,7 +88,34 @@ class MedicineInstanceViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         family_id = self.request.data.get('family_id')
         family = Family.objects.get(id=family_id)
-        serializer.save(family=family)
+        instance = serializer.save(family=family)
+        log_activity(
+            user=self.request.user,
+            family=family,
+            action='add_inventory',
+            medicine_name=instance.medicine.name_ar,
+            details={'quantity': instance.quantity, 'location': instance.location.name if instance.location else ''},
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_activity(
+            user=self.request.user,
+            family=instance.family,
+            action='edit_inventory',
+            medicine_name=instance.medicine.name_ar,
+            details={'quantity': instance.quantity, 'location': instance.location.name if instance.location else ''},
+        )
+
+    def perform_destroy(self, instance):
+        log_activity(
+            user=self.request.user,
+            family=instance.family,
+            action='delete_inventory',
+            medicine_name=instance.medicine.name_ar,
+            details={},
+        )
+        instance.delete()
 
     @action(detail=True, methods=['post'], url_path='deduct')
     def deduct(self, request, pk=None):
@@ -89,6 +128,13 @@ class MedicineInstanceViewSet(viewsets.ModelViewSet):
                 return Response({'error': f'الكمية المتاحة {instance.quantity} فقط'}, status=400)
             instance.quantity -= quantity
             instance.save()
+            log_activity(
+                user=request.user,
+                family=instance.family,
+                action='deduct_dose',
+                medicine_name=instance.medicine.name_ar,
+                details={'quantity_deducted': quantity, 'remaining': instance.quantity},
+            )
             return Response({
                 'id': instance.id,
                 'quantity': instance.quantity,
@@ -229,3 +275,18 @@ class MedicineSubmissionViewSet(viewsets.ModelViewSet):
             medicine.conditions.set(submission.conditions.all())
 
         return Response(MedicineSubmissionSerializer(submission).data)
+    
+class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = ActivityLogSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        family_id = self.request.query_params.get('family_id')
+        if not family_id:
+            return ActivityLog.objects.none()
+        cutoff = timezone.now() - timedelta(days=30)
+        return ActivityLog.objects.filter(
+            family_id=family_id,
+            timestamp__gte=cutoff,
+        ).select_related('user')
