@@ -17,7 +17,7 @@ export default function Conditions() {
     const all = data.results || data || [];
     
     const sorted = all.sort((a, b) => {
-      return a.condition?.name.localeCompare(b.name, 'ar');
+      return a.name.localeCompare(b.name, 'ar');
     });
     
     setConditions(sorted);
