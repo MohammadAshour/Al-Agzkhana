@@ -100,7 +100,8 @@ class FamilySerializer(serializers.ModelSerializer):
         model = Family
         fields = ['id', 'name', 'code', 'owner', 'memberships', 'member_count', 'created_at']
     def get_member_count(self, obj):
-        return obj.memberships.count()
+        # +1 for the owner who is not in the memberships table
+        return obj.memberships.count() + 1
     
 class ReminderSerializer(serializers.ModelSerializer):
     medicine_name = serializers.SerializerMethodField()
