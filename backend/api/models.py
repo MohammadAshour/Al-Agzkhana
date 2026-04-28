@@ -6,11 +6,14 @@ import random, string
 
 def generate_family_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+
+
 class Condition(models.Model):
     name = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
+
 
 class Medicine(models.Model):
     name_ar = models.CharField(max_length=200)
@@ -26,6 +29,7 @@ class Medicine(models.Model):
     def __str__(self):
         return self.name_ar
 
+
 class Family(models.Model):
     name = models.CharField(max_length=200)
     code = models.CharField(max_length=20, unique=True, default=generate_family_code)
@@ -33,19 +37,23 @@ class Family(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.name_ar
+        return self.name
+
+
 class FamilyMembership(models.Model):
     family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name='memberships')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='family_memberships')
     joined_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = ('family', 'user')
+
 class Location(models.Model):
     name = models.CharField(max_length=200)
     family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name='locations', null=True)
 
     def __str__(self):
         return self.name
+        
         
 class MedicineInstance(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
