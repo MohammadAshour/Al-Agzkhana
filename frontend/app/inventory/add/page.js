@@ -19,6 +19,8 @@ function AddInventoryContent() {
     production_date: '',
     open_date: '',
     location_id: '',
+    quantity: 1,
+    min_threshold: 1,
   });
 
   useEffect(() => {
@@ -117,6 +119,20 @@ function AddInventoryContent() {
           )}
         </div>
 
+        <div>
+          <label className="block text-sm font-medium mb-1">الكمية *</label>
+          <input required type="number" min="1" value={form.quantity}
+            onChange={e => setForm({...form, quantity: parseInt(e.target.value)})}
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">حد التنبيه (أقل كمية)</label>
+          <input type="number" min="1" value={form.min_threshold}
+            onChange={e => setForm({...form, min_threshold: parseInt(e.target.value)})}
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+          
         <div>
           <label className="block text-sm font-medium mb-1">تاريخ الإنتاج *</label>
           <input required type="date" value={form.production_date} onChange={e => setForm({...form, production_date: e.target.value})}

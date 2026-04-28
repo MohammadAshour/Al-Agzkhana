@@ -47,6 +47,7 @@ function InventoryContent() {
     const expiry = new Date(instance.expiry_date);
     const daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
     if (daysLeft <= 90) return 'bg-yellow-100 border-yellow-400';
+    if (instance.quantity <= instance.min_threshold) return 'bg-orange-100 border-orange-400';
     return 'bg-white border-gray-200';
   }
 
@@ -55,8 +56,18 @@ function InventoryContent() {
     const today = new Date();
     const expiry = new Date(instance.expiry_date);
     const daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-    if (daysLeft <= 90) return <span className="text-yellow-600 font-bold">⚠️ ينتهي خلال {daysLeft} يوم</span>;
-    return <span className="text-green-600">✅ صالح حتى {instance.expiry_date}</span>;
+    return (
+      <div className="flex flex-col gap-1">
+        {daysLeft <= 90 
+          ? <span className="text-yellow-600 font-bold">⚠️ ينتهي خلال {daysLeft} يوم</span>
+          : <span className="text-green-600">✅ صالح حتى {instance.expiry_date}</span>
+        }
+        {instance.quantity <= instance.min_threshold 
+          ? <span className="text-orange-600 font-bold">📦 كمية منخفضة: {instance.quantity} متبقي</span>
+          : <span className="text-gray-600 text-sm">📦 الكمية: {instance.quantity}</span>
+        }
+      </div>
+    );
   }
 
   if (loading) return <p className="text-center text-gray-500">جاري التحميل...</p>;

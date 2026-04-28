@@ -74,7 +74,9 @@ class MedicineInstance(models.Model):
     open_date = models.DateField(null=True, blank=True)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name='instances', null=True)
-
+    quantity = models.PositiveIntegerField(default=1)
+    min_threshold = models.PositiveIntegerField(default=1)
+    
     @property
     def expiry_date(self):
         full_expiry = self.production_date + relativedelta(months=self.medicine.shelf_life_months)

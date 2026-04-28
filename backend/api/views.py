@@ -66,6 +66,9 @@ class MedicineInstanceViewSet(viewsets.ModelViewSet):
         if self.request.query_params.get('expired') == 'true':
             expired_ids = [obj.id for obj in queryset if obj.is_expired]
             queryset = queryset.filter(id__in=expired_ids)
+        if self.request.query_params.get('low_stock') == 'true':
+            low_ids = [obj.id for obj in queryset if obj.quantity <= obj.min_threshold]
+            queryset = queryset.filter(id__in=low_ids)
         return queryset
 
     def perform_create(self, serializer):
