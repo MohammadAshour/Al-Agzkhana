@@ -1,6 +1,5 @@
 import "./globals.css";
-import DrawerLayout from "./DrawerLayout";
-import SessionWrapper from "./components/SessionWrapper";
+import ClientLayout from "./components/ClientLayout";
 
 export const metadata = {
   title: "الأجزخانة",
@@ -17,9 +16,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ar" dir="rtl">
       <body className="min-h-screen bg-gray-50">
-        <SessionWrapper>
-          <DrawerLayout>{children}</DrawerLayout>
-        </SessionWrapper>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
