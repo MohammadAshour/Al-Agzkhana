@@ -9,6 +9,7 @@ const staticNavItems = [
   { href: '/families', label: 'العائلات', icon: '👨‍👩‍👧‍👦' },
   { href: '/medicines', label: 'الأدوية', icon: '💊' },
   { href: '/inventory', label: 'المخزون', icon: '📦' },
+  { href: '/inventory/search', label: 'بحث ذكي', icon: '🔍' },
   { href: '/conditions', label: 'الحالات', icon: '🏥' },
   { href: '/activity', label: 'سجل النشاط', icon: '📋' },
   { href: '/reminders', label: 'التذكيرات', icon: '⏰' },

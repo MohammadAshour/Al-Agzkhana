@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ConditionViewSet, MedicineViewSet, MedicineInstanceViewSet, LocationViewSet, FamilyViewSet, UserProfileViewSet, MedicineSubmissionViewSet, ActivityLogViewSet, ReminderViewSet, DeviceTokenViewSet
+from .views import ConditionViewSet, MedicineViewSet, MedicineInstanceViewSet, LocationViewSet, FamilyViewSet, UserProfileViewSet, MedicineSubmissionViewSet, ActivityLogViewSet, ReminderViewSet, DeviceTokenViewSet, InventorySearchView
 from .auth_views import google_login
 
 router = DefaultRouter()
@@ -14,6 +14,7 @@ router.register(r'submissions', MedicineSubmissionViewSet, basename='submission'
 router.register(r'activity', ActivityLogViewSet, basename='activity')
 router.register(r'reminders', ReminderViewSet, basename='reminder')
 router.register(r'devices', DeviceTokenViewSet, basename='device')
+router.register(r'inventory', InventorySearchView, basename='inventory')
 
 
 

@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from django.utils import timezone
-from django.db import transaction
+from django.db import transaction, models
 from datetime import timedelta
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -350,3 +350,40 @@ class DeviceTokenViewSet(viewsets.ViewSet):
     def list_tokens(self, request):
         tokens = DeviceToken.objects.filter(user=request.user)
         return Response(DeviceTokenSerializer(tokens, many=True).data)
+
+class InventorySearchView(viewsets.ViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['get'], url_path='search')
+    def search(self, request):
+        query = request.query_params.get('q', '').strip()
+        family_id = request.query_params.get('family_id')
+
+        if not query:
+            return Response({'family_stock': [], 'global_catalog': []})
+
+        # Search family stock first
+        family_stock = []
+        if family_id:
+            instances = MedicineInstance.objects.filter(
+                family_id=family_id
+            ).filter(
+                models.Q(medicine__name_ar__icontains=query) |
+                models.Q(medicine__name_en__icontains=query) |
+                models.Q(location__name__icontains=query)
+            ).select_related('medicine', 'location')
+            family_stock = MedicineInstanceSerializer(instances, many=True).data
+
+        # Search global catalog
+        medicines = Medicine.objects.filter(
+            models.Q(name_ar__icontains=query) |
+            models.Q(name_en__icontains=query) |
+            models.Q(conditions__name__icontains=query)
+        ).distinct()
+        global_catalog = MedicineSerializer(medicines, many=True).data
+
+        return Response({
+            'family_stock': family_stock,
+            'global_catalog': global_catalog,
+        })
