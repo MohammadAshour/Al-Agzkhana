@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getUserRole } from '@/app/lib/api';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { getUserRole } from '@/app/lib/api';
+
 
 
 const [userRole, setUserRole] = useState('user');
@@ -50,8 +51,10 @@ export default function DrawerLayout({ children }) {
 
   
 useEffect(() => {
+  if (status === 'authenticated') {
     getUserRole().then(setUserRole);
-  }, [status]);
+  }
+}, [status]);
 
   // Show nothing while checking auth (except on login page)
   if (status === 'loading') {
