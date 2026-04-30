@@ -23,6 +23,7 @@ export default function DrawerLayout({ children }) {
   const [session, setSession] = useState(null);
   const [status, setStatus] = useState('loading');
   const [userRole, setUserRole] = useState('user');
+  const [pendingCounts, setPendingCounts] = useState({});
   const pathname = usePathname();
   const router = useRouter();
 
@@ -38,13 +39,24 @@ export default function DrawerLayout({ children }) {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      import('@/app/lib/api').then(({ getUserRole }) => {
+      import('@/app/lib/api').then(({ getUserRole, getPendingCounts }) => {
         getUserRole().then(setUserRole);
+        getPendingCounts().then(setPendingCounts);
       });
       import('@/app/lib/fcm').then(({ registerDeviceToken }) => {
         registerDeviceToken();
       });
     }
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    const interval = setInterval(() => {
+      import('@/app/lib/api').then(({ getPendingCounts }) => {
+        getPendingCounts().then(setPendingCounts);
+      });
+    }, 60000);
+    return () => clearInterval(interval);
   }, [status]);
 
   useEffect(() => {
@@ -209,7 +221,12 @@ export default function DrawerLayout({ children }) {
                   }`}
                 >
                   <span className="text-xl">🛡️</span>
-                  <span>المراجعة</span>
+                  <span className="flex-1">المراجعة</span>
+                  {pendingCounts.pending_submissions > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                      {pendingCounts.pending_submissions}
+                    </span>
+                  )}
                 </Link>
               </li>
             )}
@@ -225,7 +242,12 @@ export default function DrawerLayout({ children }) {
                   }`}
                 >
                   <span className="text-xl">⚙️</span>
-                  <span>الإدارة</span>
+                  <span className="flex-1">الإدارة</span>
+                  {pendingCounts.pending_moderator_requests > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                      {pendingCounts.pending_moderator_requests}
+                    </span>
+                  )}
                 </Link>
               </li>
             )}

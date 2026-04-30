@@ -320,6 +320,16 @@ class UserProfileViewSet(viewsets.ViewSet):
         except UserProfile.DoesNotExist:
             return Response({'error': 'المستخدم غير موجود'}, status=404)
         
+    @action(detail=False, methods=['get'], url_path='pending-counts')
+    def pending_counts(self, request):
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        counts = {}
+        if profile.role in ['moderator', 'admin']:
+            counts['pending_submissions'] = MedicineSubmission.objects.filter(status='pending').count()
+        if profile.role == 'admin':
+            counts['pending_moderator_requests'] = ModeratorRequest.objects.filter(status='pending').count()
+        return Response(counts)
+        
 
 class ModeratorRequestViewSet(viewsets.ViewSet):
     authentication_classes = [TokenAuthentication]

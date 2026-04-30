@@ -22,3 +22,18 @@ export async function getUserRole() {
     return 'user';
   }
 }
+
+export async function getPendingCounts() {
+  if (typeof window === 'undefined') return {};
+  try {
+    const headers = await getAuthHeaders();
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/profile/pending-counts/`,
+      { headers }
+    );
+    if (!res.ok) return {};
+    return await res.json();
+  } catch {
+    return {};
+  }
+}
