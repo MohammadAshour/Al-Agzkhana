@@ -108,6 +108,22 @@ export default function RemindersPage() {
     return `كل ${reminder.times?.every_hours || '?'} ساعة`;
   }
 
+  function getNextNotification(reminder) {
+    const now = new Date();
+    if (reminder.schedule_type === 'fixed_times' && Array.isArray(reminder.times)) {
+      const sorted = [...reminder.times].sort();
+      const currentTime = now.toTimeString().slice(0, 5);
+      const next = sorted.find(t => t > currentTime) || sorted[0];
+      return `التالي: ${next}`;
+    }
+    if (reminder.schedule_type === 'interval' && reminder.times?.every_hours) {
+      const h = reminder.times.every_hours;
+      const nextHour = Math.ceil(now.getHours() / h) * h % 24;
+      return `التالي: ${String(nextHour).padStart(2, '0')}:00`;
+    }
+    return '';
+  }
+
   if (loading) return <p className="text-center text-gray-500">جاري التحميل...</p>;
 
   return (
@@ -237,6 +253,7 @@ export default function RemindersPage() {
                   <h3 className="font-bold text-lg">{reminder.medicine_name}</h3>
                   <p className="text-sm text-gray-600 mt-1">💊 الجرعة: {reminder.dosage}</p>
                   <p className="text-sm text-gray-600">⏰ {formatTimes(reminder)}</p>
+                  <p className="text-xs text-blue-600">{getNextNotification(reminder)}</p>
                   <span className={`text-xs px-2 py-1 rounded-full mt-2 inline-block ${reminder.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                     {reminder.is_active ? 'نشط' : 'موقوف'}
                   </span>

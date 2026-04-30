@@ -29,7 +29,21 @@ export async function registerDeviceToken() {
 
     const app = initializeApp(firebaseConfig);
     const messaging = getMessaging(app);
-    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+
+    // Register service worker explicitly
+    let swRegistration;
+    try {
+      swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      console.log('Service worker registered');
+    } catch (err) {
+      console.error('Service worker registration failed:', err);
+      return;
+    }
+
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: swRegistration,
+});
 
     if (!token) return;
 
