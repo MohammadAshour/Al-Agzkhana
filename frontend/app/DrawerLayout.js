@@ -8,7 +8,6 @@ const staticNavItems = [
   { href: '/', label: 'الرئيسية', icon: '🏠' },
   { href: '/families', label: 'العائلات', icon: '👨‍👩‍👧‍👦' },
   { href: '/inventory', label: 'المخزون', icon: '📦' },
-  { href: '/inventory/search', label: 'بحث ذكي', icon: '🔍' },
   { href: '/activity', label: 'سجل النشاط', icon: '📋' },
   { href: '/reminders', label: 'التذكيرات', icon: '⏰' },
 ];
