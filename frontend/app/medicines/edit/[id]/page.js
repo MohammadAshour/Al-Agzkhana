@@ -86,7 +86,7 @@ export default function EditMedicine({ params }) {
 
     const res = await fetch(`${API_URL}/api/conditions/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await getAuthHeaders(),
       body: JSON.stringify({ name: newCondition }),
     });
     const data = await res.json();
