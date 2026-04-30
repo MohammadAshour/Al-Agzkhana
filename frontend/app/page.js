@@ -24,6 +24,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchExpired();
+    console.log("Hi"); // هل الكود يرى الـ ID؟
     fetchLowStock();
   }, []);
 
@@ -63,6 +64,7 @@ export default function Home() {
 
   async function fetchExpired() {
     const familyId = getFamilyId();
+    console.log("Family ID found:", familyId); // هل الكود يرى الـ ID؟
     if (!familyId) { setExpired([]); return; }
     const res = await fetch(
       `${API_URL}/api/instances/?expired=true&family_id=${familyId}`,
@@ -83,15 +85,6 @@ async function fetchLowStock() {
     setLowStock(data.results || data);
   }
 
-  async function handleSearch(e) {
-    e.preventDefault();
-    if (!search.trim()) return;
-    setLoading(true);
-    const res = await fetch(`${API_URL}/api/medicines/?search=${search}`);
-    const data = await res.json();
-    setResults(data.results || data || []);
-    setLoading(false);
-  }
 
   return (
     <div>
