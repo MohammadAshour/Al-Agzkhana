@@ -280,6 +280,37 @@ class FamilyViewSet(viewsets.ModelViewSet):
         FamilyMembership.objects.filter(family=family, user_id=user_id).delete()
         return Response(status=204)
     
+    @action(detail=True, methods=['get'], url_path='members')
+    def members(self, request, pk=None):
+        family = self.get_object()
+        if family.owner != request.user:
+            is_member = FamilyMembership.objects.filter(
+                family=family, user=request.user
+            ).exists()
+            if not is_member:
+                return Response({'error': 'غير مصرح'}, status=403)
+
+        # Build members list: owner first then rest
+        members = []
+        members.append({
+            'id': family.owner.id,
+            'email': family.owner.email,
+            'first_name': family.owner.first_name,
+            'last_name': family.owner.last_name,
+            'is_owner': True,
+            'joined_at': family.created_at,
+        })
+        for membership in family.memberships.select_related('user').order_by('joined_at'):
+            members.append({
+                'id': membership.user.id,
+                'email': membership.user.email,
+                'first_name': membership.user.first_name,
+                'last_name': membership.user.last_name,
+                'is_owner': False,
+                'joined_at': membership.joined_at,
+            })
+        return Response(members)
+    
 class UserProfileViewSet(viewsets.ViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]

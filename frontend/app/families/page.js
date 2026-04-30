@@ -14,6 +14,8 @@ export default function FamiliesPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
+  const [members, setMembers] = useState({});
+  const [expandedFamily, setExpandedFamily] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -110,6 +112,35 @@ export default function FamiliesPage() {
       setSelectedId(null);
     }
     fetchFamilies();
+  }
+
+  async function fetchMembers(familyId) {
+    if (expandedFamily === familyId) {
+      setExpandedFamily(null);
+      return;
+    }
+    const res = await fetch(`${API_URL}/api/families/${familyId}/members/`, {
+      headers: await getAuthHeaders(),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setMembers(prev => ({ ...prev, [familyId]: data }));
+      setExpandedFamily(familyId);
+    }
+  }
+
+  async function removeMember(familyId, userId) {
+    if (!confirm('هل أنت متأكد من إزالة هذا العضو؟')) return;
+    const res = await fetch(`${API_URL}/api/families/${familyId}/remove-member/`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ user_id: userId }),
+    });
+    if (res.ok) {
+      setMsg('تم إزالة العضو بنجاح');
+      fetchMembers(familyId);
+      fetchFamilies();
+    }
   }
 
   function selectFamily(family) {
@@ -218,10 +249,60 @@ export default function FamiliesPage() {
                       مغادرة
                     </button>
                   </div>
+
+              {/* Members toggle button — only show for owner */}
+              {family.owner != null && (
+                <div className="mt-3 border-t border-gray-100 pt-3">
+                  <button
+                    onClick={() => fetchMembers(family.id)}
+                    className="text-blue-900 text-sm font-medium hover:underline flex items-center gap-1"
+                  >
+                    <span>👥</span>
+                    <span>
+                      {expandedFamily === family.id ? 'إخفاء الأعضاء' : 'عرض الأعضاء'}
+                    </span>
+                  </button>
+
+                  {expandedFamily === family.id && members[family.id] && (
+                    <div className="mt-3 flex flex-col gap-2">
+                      {members[family.id].map(member => (
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2"
+                        >
+                          <div>
+                            <p className="text-sm font-medium">
+                              {member.first_name || member.email}
+                              {member.last_name ? ` ${member.last_name}` : ''}
+                              {member.is_owner && (
+                                <span className="mr-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                  المالك
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-gray-400">{member.email}</p>
+                            <p className="text-xs text-gray-400">
+                              انضم في: {new Date(member.joined_at).toLocaleDateString('ar-EG')}
+                            </p>
+                          </div>
+                          {!member.is_owner && (
+                            <button
+                              onClick={() => removeMember(family.id, member.id)}
+                              className="bg-red-100 text-red-600 px-3 py-1 rounded text-sm hover:bg-red-200"
+                            >
+                              إزالة
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            );
-          })}
+              )}
+            </div>
+          </div>
+        );
+      })}
         </div>
       )}
     </div>
