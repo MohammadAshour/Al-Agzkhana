@@ -17,6 +17,7 @@ export default function RemindersPage() {
     times: ['08:00'],
     dosage: '',
     interval_hours: 8,
+    interval_start_time: '08:00',
   });
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function RemindersPage() {
       dosage: form.dosage,
       times: form.schedule_type === 'fixed_times'
         ? form.times
-        : { every_hours: form.interval_hours },
+        : { every_hours: form.interval_hours, start_time: form.interval_start_time },
     };
     const res = await fetch(`${API_URL}/api/reminders/`, {
       method: 'POST',
@@ -105,7 +106,9 @@ export default function RemindersPage() {
         ? reminder.times.join(' — ')
         : JSON.stringify(reminder.times);
     }
-    return `كل ${reminder.times?.every_hours || '?'} ساعة`;
+    const every = reminder.times?.every_hours || '?';
+    const start = reminder.times?.start_time || '00:00';
+    return `كل ${every} ساعة — بداية من ${start}`;
   }
 
   function getNextNotification(reminder) {
@@ -117,9 +120,22 @@ export default function RemindersPage() {
       return `التالي: ${next}`;
     }
     if (reminder.schedule_type === 'interval' && reminder.times?.every_hours) {
-      const h = reminder.times.every_hours;
-      const nextHour = Math.ceil(now.getHours() / h) * h % 24;
-      return `التالي: ${String(nextHour).padStart(2, '0')}:00`;
+      const every = reminder.times.every_hours;
+      const start = reminder.times?.start_time || '00:00';
+      const [startHour, startMin] = start.split(':').map(Number);
+
+      // Calculate all notification times for today
+      const notificationTimes = [];
+      let h = startHour;
+      let m = startMin;
+      while (notificationTimes.length < Math.floor(24 / every) + 1) {
+        notificationTimes.push(`${String(h % 24).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+        h += every;
+      }
+
+      const currentTime = now.toTimeString().slice(0, 5);
+      const next = notificationTimes.find(t => t > currentTime) || notificationTimes[0];
+      return `التالي: ${next}`;
     }
     return '';
   }
@@ -217,16 +233,30 @@ export default function RemindersPage() {
               </button>
             </div>
           ) : (
-            <div>
-              <label className="block text-sm font-medium mb-1">كل كم ساعة؟ *</label>
-              <input
-                type="number"
-                min="1"
-                max="24"
-                value={form.interval_hours}
-                onChange={e => setForm({ ...form, interval_hours: parseInt(e.target.value) })}
-                className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">كل كم ساعة؟ *</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="24"
+                  value={form.interval_hours}
+                  onChange={e => setForm({ ...form, interval_hours: parseInt(e.target.value) })}
+                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">وقت البداية *</label>
+                <input
+                  type="time"
+                  value={form.interval_start_time}
+                  onChange={e => setForm({ ...form, interval_start_time: e.target.value })}
+                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  مثال: إذا اخترت كل 8 ساعات والبداية 08:00 — ستصلك تذكيرات في 08:00 و 16:00 و 00:00
+                </p>
+              </div>
             </div>
           )}
 
