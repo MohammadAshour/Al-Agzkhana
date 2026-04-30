@@ -81,6 +81,13 @@ export default function ProfilePage() {
     }
   }
 
+   function handleSignOut() {
+    import('next-auth/react').then(({ signOut }) => {
+      localStorage.removeItem('authToken');
+      signOut({ callbackUrl: '/auth/login' });
+    });
+  }
+
   const roleLabel = { user: 'مستخدم', moderator: 'مشرف', admin: 'مدير' };
   const roleColor = { user: 'bg-gray-100 text-gray-700', moderator: 'bg-blue-100 text-blue-700', admin: 'bg-purple-100 text-purple-700' };
 
@@ -120,6 +127,16 @@ export default function ProfilePage() {
               )}
             </div>
           )}
+
+          <div>
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors hover:bg-red-700 text-blue-100"
+            >
+              <span className="text-xl">🚪</span>
+              <span>تسجيل خروج</span>
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -81,13 +81,6 @@ export default function DrawerLayout({ children }) {
     }
   }, [status, pathname, router]);
 
-  function handleSignOut() {
-    import('next-auth/react').then(({ signOut }) => {
-      localStorage.removeItem('authToken');
-      signOut({ callbackUrl: '/auth/login' });
-    });
-  }
-
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -252,15 +245,6 @@ export default function DrawerLayout({ children }) {
               </li>
             )}
 
-            <li>
-              <button
-                onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors hover:bg-red-700 text-blue-100"
-              >
-                <span className="text-xl">🚪</span>
-                <span>تسجيل خروج</span>
-              </button>
-            </li>
           </ul>
         </nav>
 
