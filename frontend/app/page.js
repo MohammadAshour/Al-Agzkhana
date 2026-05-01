@@ -12,7 +12,6 @@ const FORM_LABELS = {
 };
 
 export default function Home() {
-  const [search, setSearch] = useState('');
   const [expired, setExpired] = useState([]);
   const [lowStock, setLowStock] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -81,16 +80,6 @@ async function fetchLowStock() {
     );
     const data = await res.json();
     setLowStock(data.results || data);
-  }
-
-  async function handleSearch(e) {
-    e.preventDefault();
-    if (!search.trim()) return;
-    setLoading(true);
-    const res = await fetch(`${API_URL}/api/medicines/?search=${search}`);
-    const data = await res.json();
-    setResults(data.results || data || []);
-    setLoading(false);
   }
 
   return (
