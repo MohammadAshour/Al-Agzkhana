@@ -87,10 +87,6 @@ def send_fcm_notification(token, title, body):
     payload = {
         'message': {
             'token': token,
-            'notification': {
-                'title': title,
-                'body': body,
-            },
             'data': {
                 'title': title,
                 'body': body,
