@@ -1,5 +1,7 @@
-from django.apps import AppConfig
+import os
+import sys
 import logging
+from django.apps import AppConfig
 
 logger = logging.getLogger(__name__)
 
@@ -8,11 +10,13 @@ class ApiConfig(AppConfig):
     name = "api"
 
     def ready(self):
-        # Only start scheduler in the main process, not in migrations or management commands
-        import sys
-        if 'runserver' in sys.argv or 'gunicorn' in sys.argv[0:1]:
+        is_runserver = 'runserver' in sys.argv
+        is_gunicorn = os.environ.get('SERVER_SOFTWARE', '').startswith('gunicorn')
+        is_main_reload_process = os.environ.get('RUN_MAIN') == 'true'
+        if is_gunicorn or (is_runserver and is_main_reload_process):
             try:
                 from .scheduler import start_scheduler
                 start_scheduler()
+                logger.info("Scheduler started successfully.")
             except Exception as e:
-                logger.error(f'Failed to start scheduler: {e}')
+                logger.error(f"Failed to start scheduler: {e}")
