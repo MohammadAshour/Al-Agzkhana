@@ -85,21 +85,20 @@ def send_fcm_notification(token, title, body):
     url = f'https://fcm.googleapis.com/v1/projects/{project_id}/messages:send'
 
     payload = {
-        'message': {
-            'token': token,
-            'data': {
-                'title': title,
-                'body': body,
-            },
-            'webpush': {
-                'notification': {
-                    'title': title,
-                    'body': body,
-                    'icon': '/icon-192.png',
-                }
+    'message': {
+        'token': token,
+        'data': {
+            'title': title,
+            'body': body,
+        },
+        'webpush': {
+            'headers': {
+                'Urgency': 'high'
             }
+            # no 'notification' key here
         }
     }
+}
 
     res = requests.post(
         url,
