@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-import os
+import tempfile, os
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -124,14 +125,29 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# Handle Aiven SSL CA cert from environment variable
+ssl_ca_content = os.environ.get('DB_SSL_CA_CONTENT')
+if ssl_ca_content:
+    _tmp_ca = tempfile.NamedTemporaryFile(delete=False, suffix='.pem', mode='w')
+    _tmp_ca.write(ssl_ca_content)
+    _tmp_ca.close()
+    _ca_path = _tmp_ca.name
+else:
+    _ca_path = 'ca.pem'  # local development
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get('DB_NAME', 'railway'),
-        "USER": os.environ.get('DB_USER', 'root'),
+        "NAME": os.environ.get('DB_NAME', 'defaultdb'),
+        "USER": os.environ.get('DB_USER', 'avnadmin'),
         "PASSWORD": os.environ.get('DB_PASSWORD', ''),
-        "HOST": os.environ.get('DB_HOST', 'tramway.proxy.rlwy.net'),
-        "PORT": os.environ.get('DB_PORT', '44097'),
+        "HOST": os.environ.get('DB_HOST', ''),
+        "PORT": os.environ.get('DB_PORT', '19669'),
+        "OPTIONS": {
+            "charset": "utf8mb4",
+            "connect_timeout": 10,
+            "ssl": {"ca": os.environ.get('DB_SSL_CA', 'ca.pem')},
+        },
     }
 }
 
