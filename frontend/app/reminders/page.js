@@ -97,12 +97,12 @@ export default function RemindersPage() {
   function formatTimes(reminder) {
     if (reminder.schedule_type === 'fixed_times') {
       return Array.isArray(reminder.times)
-        ? reminder.times.join(' — ')
+        ? reminder.times.map(to12Hour).join(' — ')
         : JSON.stringify(reminder.times);
     }
     const every = reminder.times?.every_hours || '?';
     const start = reminder.times?.start_time || '00:00';
-    return `كل ${every} ساعة — بداية من ${start}`;
+    return `كل ${every} ساعة — بداية من ${to12Hour(start)}`;
   }
 
   function getNextNotification(reminder) {
@@ -111,14 +111,13 @@ export default function RemindersPage() {
       const sorted = [...reminder.times].sort();
       const currentTime = now.toTimeString().slice(0, 5);
       const next = sorted.find(t => t > currentTime) || sorted[0];
-      return `التالي: ${next}`;
+      return `التالي: ${to12Hour(next)}`;
     }
     if (reminder.schedule_type === 'interval' && reminder.times?.every_hours) {
       const every = reminder.times.every_hours;
       const start = reminder.times?.start_time || '00:00';
       const [startHour, startMin] = start.split(':').map(Number);
 
-      // Calculate all notification times for today
       const notificationTimes = [];
       let h = startHour;
       let m = startMin;
@@ -129,10 +128,17 @@ export default function RemindersPage() {
 
       const currentTime = now.toTimeString().slice(0, 5);
       const next = notificationTimes.find(t => t > currentTime) || notificationTimes[0];
-      return `التالي: ${next}`;
+      return `التالي: ${to12Hour(next)}`;
     }
     return '';
   }
+
+  function to12Hour(time24) {
+    const [h, m] = time24.split(':').map(Number);
+    const period = h < 12 ? 'ص' : 'م';
+    const hour = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${hour}:${String(m).padStart(2, '0')} ${period}`;
+}
 
   if (loading) return <p className="text-center text-gray-500">جاري التحميل...</p>;
 
@@ -211,9 +217,15 @@ export default function RemindersPage() {
                       }}
                       className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      {Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0')).map(h => (
-                        <option key={h} value={h}>{h}</option>
-                      ))}
+                      {Array.from({ length: 24 }, (_, h) => {
+                        const period = h < 12 ? 'ص' : 'م';
+                        const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
+                        return (
+                          <option key={String(h).padStart(2, '0')} value={String(h).padStart(2, '0')}>
+                            {display} {period}
+                          </option>
+                        );
+                      })}
                     </select>
                     <select
                       value={t.split(':')[1]}
@@ -268,9 +280,15 @@ export default function RemindersPage() {
                     onChange={e => setForm({ ...form, interval_start_time: `${e.target.value}:${form.interval_start_time.split(':')[1]}` })}
                     className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0')).map(h => (
-                      <option key={h} value={h}>{h}</option>
-                    ))}
+                    {Array.from({ length: 24 }, (_, h) => {
+                      const period = h < 12 ? 'ص' : 'م';
+                      const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
+                      return (
+                        <option key={String(h).padStart(2, '0')} value={String(h).padStart(2, '0')}>
+                          {display} {period}
+                        </option>
+                      );
+                    })}
                   </select>
                   <select
                     value={form.interval_start_time.split(':')[1]}
