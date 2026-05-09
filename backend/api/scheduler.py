@@ -3,7 +3,7 @@ import json
 import os
 from django.utils import timezone
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
 from django_apscheduler.jobstores import DjangoJobStore
 
 logger = logging.getLogger(__name__)
@@ -190,7 +190,7 @@ def start_scheduler():
 
     scheduler.add_job(
         check_and_send_reminders,
-        trigger=IntervalTrigger(minutes=1),
+        trigger=CronTrigger(minute='0,30'),
         id='check_reminders',
         name='Check and send reminders every minute',
         replace_existing=True,

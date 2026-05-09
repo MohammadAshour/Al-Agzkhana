@@ -90,12 +90,6 @@ export default function RemindersPage() {
     setForm({ ...form, times: [...form.times, '08:00'] });
   }
 
-  function updateTime(index, value) {
-    const updated = [...form.times];
-    updated[index] = value;
-    setForm({ ...form, times: updated });
-  }
-
   function removeTime(index) {
     setForm({ ...form, times: form.times.filter((_, i) => i !== index) });
   }
@@ -207,12 +201,33 @@ export default function RemindersPage() {
               <label className="block text-sm font-medium mb-2">الأوقات *</label>
               {form.times.map((t, i) => (
                 <div key={i} className="flex gap-2 mb-2">
-                  <input
-                    type="time"
-                    value={t}
-                    onChange={e => updateTime(i, e.target.value)}
-                    className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="flex gap-2 flex-1">
+                    <select
+                      value={t.split(':')[0]}
+                      onChange={e => {
+                        const updated = [...form.times];
+                        updated[i] = `${e.target.value}:${t.split(':')[1]}`;
+                        setForm({ ...form, times: updated });
+                      }}
+                      className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0')).map(h => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={t.split(':')[1]}
+                      onChange={e => {
+                        const updated = [...form.times];
+                        updated[i] = `${t.split(':')[0]}:${e.target.value}`;
+                        setForm({ ...form, times: updated });
+                      }}
+                      className="w-24 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="00">00</option>
+                      <option value="30">30</option>
+                    </select>
+                  </div>
                   {form.times.length > 1 && (
                     <button
                       type="button"
@@ -247,12 +262,25 @@ export default function RemindersPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">وقت البداية *</label>
-                <input
-                  type="time"
-                  value={form.interval_start_time}
-                  onChange={e => setForm({ ...form, interval_start_time: e.target.value })}
-                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div className="flex gap-2">
+                  <select
+                    value={form.interval_start_time.split(':')[0]}
+                    onChange={e => setForm({ ...form, interval_start_time: `${e.target.value}:${form.interval_start_time.split(':')[1]}` })}
+                    className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0')).map(h => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={form.interval_start_time.split(':')[1]}
+                    onChange={e => setForm({ ...form, interval_start_time: `${form.interval_start_time.split(':')[0]}:${e.target.value}` })}
+                    className="w-24 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="00">00</option>
+                    <option value="30">30</option>
+                  </select>
+                </div>
                 <p className="text-xs text-gray-400 mt-1">
                   مثال: إذا اخترت كل 8 ساعات والبداية 08:00 — ستصلك تذكيرات في 08:00 و 16:00 و 00:00
                 </p>
