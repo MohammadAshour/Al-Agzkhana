@@ -146,7 +146,7 @@ DATABASES = {
         "OPTIONS": {
             "charset": "utf8mb4",
             "connect_timeout": 10,
-            "ssl": {"ca": os.environ.get('DB_SSL_CA', 'ca.pem')},
+            "ssl": {"ssl_disabled": False},
         },
     }
 }
