@@ -353,7 +353,39 @@ export default function RemindersPage() {
               <label className="block text-sm font-medium mb-2">أوقات التذكير *</label>
               {form.weekly_times.map((t, i) => (
                 <div key={i} className="flex gap-2 mb-2">
-                  {/* same hour/minute selects as fixed_times, but bound to weekly_times */}
+                  <div className="flex gap-2 flex-1">
+                    <select
+                      value={t.split(':')[0]}
+                      onChange={e => {
+                        const updated = [...form.times];
+                        updated[i] = `${e.target.value}:${t.split(':')[1]}`;
+                        setForm({ ...form, times: updated });
+                      }}
+                      className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {Array.from({ length: 24 }, (_, h) => {
+                        const period = h < 12 ? 'ص' : 'م';
+                        const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
+                        return (
+                          <option key={String(h).padStart(2, '0')} value={String(h).padStart(2, '0')}>
+                            {display} {period}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <select
+                      value={t.split(':')[1]}
+                      onChange={e => {
+                        const updated = [...form.times];
+                        updated[i] = `${t.split(':')[0]}:${e.target.value}`;
+                        setForm({ ...form, times: updated });
+                      }}
+                      className="w-24 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="00">00</option>
+                      <option value="30">30</option>
+                    </select>
+                  </div>
                 </div>
               ))}
             </div>
