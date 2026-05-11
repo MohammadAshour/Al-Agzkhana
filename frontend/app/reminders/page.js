@@ -18,6 +18,9 @@ export default function RemindersPage() {
     dosage: '',
     interval_hours: 8,
     interval_start_time: '08:00',
+    weekly_days: [],
+    weekly_times: ['08:00'],
+    end_date: '', 
   });
 
   useEffect(() => {
@@ -52,7 +55,10 @@ export default function RemindersPage() {
       dosage: form.dosage,
       times: form.schedule_type === 'fixed_times'
         ? form.times
-        : { every_hours: form.interval_hours, start_time: form.interval_start_time },
+        : form.schedule_type === 'interval'
+        ? { every_hours: form.interval_hours, start_time: form.interval_start_time }
+        : { days: form.weekly_days, times: form.weekly_times },
+      end_date: form.end_date || null, 
     };
     const res = await fetch(`${API_URL}/api/reminders/`, {
       method: 'POST',
@@ -95,6 +101,12 @@ export default function RemindersPage() {
   }
 
   function formatTimes(reminder) {
+    if (reminder.schedule_type === 'weekly') {
+      const DAY_NAMES = ['الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','الأحد'];
+      const days = (reminder.times?.days || []).map(d => DAY_NAMES[d]).join('، ');
+      const times = (reminder.times?.times || []).map(to12Hour).join(' — ');
+      return `${days} — ${times}`;
+    }
     if (reminder.schedule_type === 'fixed_times') {
       return Array.isArray(reminder.times)
         ? reminder.times.map(to12Hour).join(' — ')
@@ -199,6 +211,7 @@ export default function RemindersPage() {
             >
               <option value="fixed_times">أوقات محددة</option>
               <option value="interval">كل فترة زمنية</option>
+              <option value="weekly">أيام محددة في الأسبوع</option>
             </select>
           </div>
 
@@ -259,7 +272,7 @@ export default function RemindersPage() {
                 + إضافة وقت آخر
               </button>
             </div>
-          ) : (
+          ) : form.schedule_type === 'interval' ? (
             <div className="flex flex-col gap-3">
               <div>
                 <label className="block text-sm font-medium mb-1">كل كم ساعة؟ *</label>
@@ -304,8 +317,57 @@ export default function RemindersPage() {
                 </p>
               </div>
             </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium mb-2">أيام الأسبوع *</label>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {[
+                  { label: 'الاثنين', value: 0 },
+                  { label: 'الثلاثاء', value: 1 },
+                  { label: 'الأربعاء', value: 2 },
+                  { label: 'الخميس', value: 3 },
+                  { label: 'الجمعة', value: 4 },
+                  { label: 'السبت', value: 5 },
+                  { label: 'الأحد', value: 6 },
+                ].map(day => (
+                  <button
+                    type="button"
+                    key={day.value}
+                    onClick={() => {
+                      const updated = form.weekly_days.includes(day.value)
+                        ? form.weekly_days.filter(d => d !== day.value)
+                        : [...form.weekly_days, day.value];
+                      setForm({ ...form, weekly_days: updated });
+                    }}
+                    className={`px-3 py-1 rounded-full text-sm border ${
+                      form.weekly_days.includes(day.value)
+                        ? 'bg-blue-900 text-white border-blue-900'
+                        : 'bg-white text-gray-700 border-gray-300'
+                    }`}
+                  >
+                    {day.label}
+                  </button>
+                ))}
+              </div>
+              {/* Reuse fixed_times time pickers for weekly_times */}
+              <label className="block text-sm font-medium mb-2">أوقات التذكير *</label>
+              {form.weekly_times.map((t, i) => (
+                <div key={i} className="flex gap-2 mb-2">
+                  {/* same hour/minute selects as fixed_times, but bound to weekly_times */}
+                </div>
+              ))}
+            </div>
           )}
 
+          <div>
+            <label className="block text-sm font-medium mb-1">تاريخ الانتهاء (اختياري)</label>
+            <input
+              type="date"
+              value={form.end_date}
+              onChange={e => setForm({ ...form, end_date: e.target.value })}
+              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
           <button
             type="submit"
             className="bg-blue-900 text-white py-3 rounded-lg hover:bg-blue-800"

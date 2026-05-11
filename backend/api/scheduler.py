@@ -163,6 +163,22 @@ def check_and_send_reminders():
                     diff = (now_total_minutes - start_total_minutes) % (24 * 60)
                     should_notify = (diff % interval_minutes == 0)
 
+        elif reminder.schedule_type == 'weekly':
+            times_data = reminder.times
+            if isinstance(times_data, dict):
+                days = times_data.get('days', [])       # e.g. [0,2,4] = Mon,Wed,Fri
+                daily_times = times_data.get('times', [])
+                current_day = now.weekday()             # 0=Monday … 6=Sunday
+                if current_day in days:
+                    should_notify = current_time_str in daily_times
+
+        # Check end_date for all types:
+        if should_notify and reminder.end_date:
+            if now.date() > reminder.end_date:
+                reminder.is_active = False
+                reminder.save()
+                continue
+
         if not should_notify:
             continue
 
