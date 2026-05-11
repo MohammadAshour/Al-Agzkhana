@@ -357,9 +357,9 @@ export default function RemindersPage() {
                     <select
                       value={t.split(':')[0]}
                       onChange={e => {
-                        const updated = [...form.times];
+                        const updated = [...form.weekly_times];
                         updated[i] = `${e.target.value}:${t.split(':')[1]}`;
-                        setForm({ ...form, times: updated });
+                        setForm({ ...form, weekly_times: updated });
                       }}
                       className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
@@ -376,9 +376,9 @@ export default function RemindersPage() {
                     <select
                       value={t.split(':')[1]}
                       onChange={e => {
-                        const updated = [...form.times];
+                        const updated = [...form.weekly_times];
                         updated[i] = `${t.split(':')[0]}:${e.target.value}`;
-                        setForm({ ...form, times: updated });
+                        setForm({ ...form, weekly_times: updated });
                       }}
                       className="w-24 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
