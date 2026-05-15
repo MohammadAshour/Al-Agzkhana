@@ -7,10 +7,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function RemindersPage() {
   const [reminders, setReminders] = useState([]);
-  const [instances, setInstances] = useState([]);
+  const  [instances, setInstances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [msg, setMsg] = useState('');
+  const [editingReminder, setEditingReminder] = useState(null);
   const [form, setForm] = useState({
     medicine_instance: '',
     schedule_type: 'fixed_times',
@@ -18,9 +19,6 @@ export default function RemindersPage() {
     dosage: '',
     interval_hours: 8,
     interval_start_time: '08:00',
-    weekly_days: [],
-    weekly_times: ['08:00'],
-    end_date: '', 
   });
 
   useEffect(() => {
@@ -47,33 +45,88 @@ export default function RemindersPage() {
     setInstances(data.results || data || []);
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const payload = {
-      medicine_instance: form.medicine_instance,
-      schedule_type: form.schedule_type,
-      dosage: form.dosage,
-      times: form.schedule_type === 'fixed_times'
-        ? form.times
-        : form.schedule_type === 'interval'
-        ? { every_hours: form.interval_hours, start_time: form.interval_start_time }
-        : { days: form.weekly_days, times: form.weekly_times },
-      end_date: form.end_date || null, 
-    };
-    const res = await fetch(`${API_URL}/api/reminders/`, {
-      method: 'POST',
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) {
-      setMsg('تم إضافة التذكير بنجاح');
-      setShowForm(false);
-      setForm({ medicine_instance: '', schedule_type: 'fixed_times', times: ['08:00'], dosage: '', interval_hours: 8 });
-      fetchReminders();
-    } else {
-      setMsg('حدث خطأ، حاول مرة أخرى');
-    }
+  function resetForm() {
+  setForm({
+    medicine_instance: '',
+    schedule_type: 'fixed_times',
+    times: ['08:00'],
+    dosage: '',
+    interval_hours: 8,
+    interval_start_time: '08:00',
+  });
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  const payload = {
+    medicine_instance: form.medicine_instance,
+    schedule_type: form.schedule_type,
+    dosage: form.dosage,
+    times: form.schedule_type === 'fixed_times'
+      ? form.times
+      : { every_hours: form.interval_hours, start_time: form.interval_start_time },
+  };
+  const res = await fetch(`${API_URL}/api/reminders/`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (res.ok) {
+    setMsg('تم إضافة التذكير بنجاح');
+    setShowForm(false);
+    resetForm();
+    fetchReminders();
+  } else {
+    setMsg('حدث خطأ، حاول مرة أخرى');
   }
+}
+
+async function handleUpdate(e) {
+  e.preventDefault();
+  const payload = {
+    medicine_instance: form.medicine_instance,
+    schedule_type: form.schedule_type,
+    dosage: form.dosage,
+    times: form.schedule_type === 'fixed_times'
+      ? form.times
+      : { every_hours: form.interval_hours, start_time: form.interval_start_time },
+  };
+  const res = await fetch(`${API_URL}/api/reminders/${editingReminder}/`, {
+    method: 'PUT',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (res.ok) {
+    setMsg('تم تحديث التذكير بنجاح');
+    setShowForm(false);
+    setEditingReminder(null);
+    resetForm();
+    fetchReminders();
+  } else {
+    const data = await res.json();
+    setMsg(data?.detail || 'حدث خطأ، حاول مرة أخرى');
+  }
+}
+
+function startEdit(reminder) {
+  setEditingReminder(reminder.id);
+  setForm({
+    medicine_instance: reminder.medicine_instance,
+    schedule_type: reminder.schedule_type,
+    dosage: reminder.dosage,
+    times: reminder.schedule_type === 'fixed_times'
+      ? (Array.isArray(reminder.times) ? reminder.times : ['08:00'])
+      : ['08:00'],
+    interval_hours: reminder.schedule_type === 'interval'
+      ? (reminder.times?.every_hours || 8)
+      : 8,
+    interval_start_time: reminder.schedule_type === 'interval'
+      ? (reminder.times?.start_time || '08:00')
+      : '08:00',
+  });
+  setShowForm(true);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
   async function handleToggle(id) {
     await fetch(`${API_URL}/api/reminders/${id}/toggle/`, {
@@ -158,11 +211,20 @@ export default function RemindersPage() {
     <div className="max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-blue-900">التذكيرات</h2>
+
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            if (editingReminder) {
+              setEditingReminder(null);
+              resetForm();
+              setShowForm(false);
+            } else {
+              setShowForm(!showForm);
+            }
+          }}
           className="bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800"
         >
-          ➕ تذكير جديد
+          {editingReminder ? 'إلغاء التعديل' : showForm ? 'إغلاق' : '➕ تذكير جديد'}
         </button>
       </div>
 
@@ -173,9 +235,14 @@ export default function RemindersPage() {
       )}
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-4 mb-6 flex flex-col gap-4">
+        <form onSubmit={editingReminder ? handleUpdate : handleSubmit} className="bg-white rounded-lg shadow p-4 mb-6 flex flex-col gap-4">
+          {editingReminder && (
+            <p className="text-sm text-blue-700 bg-blue-50 px-3 py-2 rounded-lg">
+              ✏️ أنت تعدل تذكيراً موجوداً
+            </p>
+          )}
           <div>
-            <label className="block text-sm font-medium mb-1">الدواء *</label>
+            <label className="block text-sm font-medium mb-1">الدواء *</label>    
             <select
               required
               value={form.medicine_instance}
@@ -404,7 +471,7 @@ export default function RemindersPage() {
             type="submit"
             className="bg-blue-900 text-white py-3 rounded-lg hover:bg-blue-800"
           >
-            حفظ التذكير
+            {editingReminder ? 'تحديث التذكير' : 'حفظ التذكير'}
           </button>
         </form>
       )}
@@ -416,7 +483,13 @@ export default function RemindersPage() {
           {reminders.map(reminder => (
             <div
               key={reminder.id}
-              className={`bg-white rounded-lg shadow p-4 border-2 ${reminder.is_active ? 'border-blue-200' : 'border-gray-200 opacity-60'}`}
+              className={`bg-white rounded-lg shadow p-4 border-2 ${
+                editingReminder === reminder.id
+                  ? 'border-blue-500 ring-2 ring-blue-300'
+                  : reminder.is_active
+                  ? 'border-blue-200'
+                  : 'border-gray-200 opacity-60'
+              }`}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -429,6 +502,12 @@ export default function RemindersPage() {
                   </span>
                 </div>
                 <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => startEdit(reminder)}
+                    className="bg-blue-700 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                  >
+                    تعديل
+                  </button>
                   <button
                     onClick={() => handleToggle(reminder.id)}
                     className={`px-3 py-1 rounded text-sm ${reminder.is_active ? 'bg-yellow-500 text-white hover:bg-yellow-400' : 'bg-green-700 text-white hover:bg-green-600'}`}
