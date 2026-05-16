@@ -19,6 +19,9 @@ export default function RemindersPage() {
     dosage: '',
     interval_hours: 8,
     interval_start_time: '08:00',
+    weekly_days: [],
+    weekly_times: ['08:00'],
+    end_date: '',
   });
 
   useEffect(() => {
@@ -53,6 +56,9 @@ export default function RemindersPage() {
     dosage: '',
     interval_hours: 8,
     interval_start_time: '08:00',
+    weekly_days: [],
+    weekly_times: ['08:00'],
+    end_date: '',
   });
 }
 
