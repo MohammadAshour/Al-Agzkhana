@@ -64,19 +64,30 @@ export default function RemindersPage() {
 
 async function handleSubmit(e) {
   e.preventDefault();
+
+  let times;
+  if (form.schedule_type === 'fixed_times') {
+    times = form.times;
+  } else if (form.schedule_type === 'interval') {
+    times = { every_hours: form.interval_hours, start_time: form.interval_start_time };
+  } else if (form.schedule_type === 'weekly') {
+    times = { days: form.weekly_days, times: form.weekly_times };
+  }
+
   const payload = {
     medicine_instance: form.medicine_instance,
     schedule_type: form.schedule_type,
     dosage: form.dosage,
-    times: form.schedule_type === 'fixed_times'
-      ? form.times
-      : { every_hours: form.interval_hours, start_time: form.interval_start_time },
+    end_date: form.end_date || null,
+    times,
   };
+
   const res = await fetch(`${API_URL}/api/reminders/`, {
     method: 'POST',
     headers: await getAuthHeaders(),
     body: JSON.stringify(payload),
   });
+
   if (res.ok) {
     setMsg('تم إضافة التذكير بنجاح');
     setShowForm(false);
@@ -89,19 +100,30 @@ async function handleSubmit(e) {
 
 async function handleUpdate(e) {
   e.preventDefault();
+
+  let times;
+  if (form.schedule_type === 'fixed_times') {
+    times = form.times;
+  } else if (form.schedule_type === 'interval') {
+    times = { every_hours: form.interval_hours, start_time: form.interval_start_time };
+  } else if (form.schedule_type === 'weekly') {
+    times = { days: form.weekly_days, times: form.weekly_times };
+  }
+
   const payload = {
     medicine_instance: form.medicine_instance,
     schedule_type: form.schedule_type,
     dosage: form.dosage,
-    times: form.schedule_type === 'fixed_times'
-      ? form.times
-      : { every_hours: form.interval_hours, start_time: form.interval_start_time },
+    end_date: form.end_date || null,
+    times,
   };
+
   const res = await fetch(`${API_URL}/api/reminders/${editingReminder}/`, {
     method: 'PUT',
     headers: await getAuthHeaders(),
     body: JSON.stringify(payload),
   });
+
   if (res.ok) {
     setMsg('تم تحديث التذكير بنجاح');
     setShowForm(false);
