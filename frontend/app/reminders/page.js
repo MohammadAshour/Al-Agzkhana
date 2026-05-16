@@ -120,6 +120,7 @@ function startEdit(reminder) {
     medicine_instance: reminder.medicine_instance,
     schedule_type: reminder.schedule_type,
     dosage: reminder.dosage,
+    end_date: reminder.end_date || '',
     times: reminder.schedule_type === 'fixed_times'
       ? (Array.isArray(reminder.times) ? reminder.times : ['08:00'])
       : ['08:00'],
@@ -129,6 +130,12 @@ function startEdit(reminder) {
     interval_start_time: reminder.schedule_type === 'interval'
       ? (reminder.times?.start_time || '08:00')
       : '08:00',
+    weekly_days: reminder.schedule_type === 'weekly'
+      ? (reminder.times?.days || [])
+      : [],
+    weekly_times: reminder.schedule_type === 'weekly'
+      ? (reminder.times?.times || ['08:00'])
+      : ['08:00'],
   });
   setShowForm(true);
   window.scrollTo({ top: 0, behavior: 'smooth' });
