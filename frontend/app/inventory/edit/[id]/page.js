@@ -1,13 +1,14 @@
 'use client';
-import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import FamilyGuard from '@/app/components/FamilyGuard';
 import { getFamilyId } from '@/app/lib/family';
 import { getAuthHeaders } from '@/app/lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-function EditInventoryContent({ id }) {
+function EditInventoryContent() {
+  const { id } = useParams();
   const router = useRouter();
   const [medicines, setMedicines] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -44,7 +45,6 @@ function EditInventoryContent({ id }) {
   }
 
   async function fetchInstance() {
-    if (!id) return;
     const res = await fetch(`${API_URL}/api/instances/${id}/`, { headers: await getAuthHeaders() });
     const data = await res.json();
     setForm({
@@ -89,7 +89,7 @@ function EditInventoryContent({ id }) {
     });
     router.push('/inventory');
   }
-  
+
   return (
     <div className="max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold text-blue-900 mb-6">تعديل دواء في المنزل</h2>
@@ -148,7 +148,7 @@ function EditInventoryContent({ id }) {
             onChange={e => setForm({...form, min_threshold: parseInt(e.target.value)})}
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium mb-1">تاريخ الإنتاج *</label>
           <input required type="date" value={form.production_date} onChange={e => setForm({...form, production_date: e.target.value})}
@@ -170,7 +170,6 @@ function EditInventoryContent({ id }) {
   );
 }
 
-export default function EditInventory({ params }) {
-  const { id } = use(params);
-  return <FamilyGuard><EditInventoryContent id={id} /></FamilyGuard>;
+export default function EditInventory() {
+  return <FamilyGuard><EditInventoryContent /></FamilyGuard>;
 }
