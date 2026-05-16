@@ -24,10 +24,11 @@ function EditInventoryContent({ id }) {
   });
 
   useEffect(() => {
+    if (!id) return;
     fetchMedicines();
     fetchLocations();
     fetchInstance();
-  }, []);
+  }, [id]);
 
   async function fetchMedicines() {
     const res = await fetch(`${API_URL}/api/medicines/`, { headers: await getAuthHeaders() });
@@ -43,6 +44,7 @@ function EditInventoryContent({ id }) {
   }
 
   async function fetchInstance() {
+    if (!id) return;
     const res = await fetch(`${API_URL}/api/instances/${id}/`, { headers: await getAuthHeaders() });
     const data = await res.json();
     setForm({
@@ -86,8 +88,8 @@ function EditInventoryContent({ id }) {
       body: JSON.stringify(payload),
     });
     router.push('/inventory');
-}
-
+  }
+  
   return (
     <div className="max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold text-blue-900 mb-6">تعديل دواء في المنزل</h2>
