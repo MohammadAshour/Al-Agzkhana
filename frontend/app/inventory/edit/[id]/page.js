@@ -7,8 +7,7 @@ import { getAuthHeaders } from '@/app/lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-function EditInventoryContent({ params }) {
-  const { id } = use(params);
+function EditInventoryContent({ id }) {
   const router = useRouter();
   const [medicines, setMedicines] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -169,6 +168,7 @@ function EditInventoryContent({ params }) {
   );
 }
 
-export default function EditInventory() {
-  return <FamilyGuard><EditInventoryContent /></FamilyGuard>;
+export default function EditInventory({ params }) {
+  const { id } = use(params);
+  return <FamilyGuard><EditInventoryContent id={id} /></FamilyGuard>;
 }
