@@ -57,6 +57,20 @@ function EditInventoryContent() {
     });
   }
 
+  async function fetchInstance() {
+  const res = await fetch(`${API_URL}/api/instances/${id}/`, { headers: await getAuthHeaders() });
+  console.log('fetchInstance status:', res.status, 'id:', id);
+  const data = await res.json();
+  console.log('fetchInstance data:', data);
+  setForm({
+    medicine_id: data.medicine?.id || '',
+    production_date: data.production_date || '',
+    open_date: data.open_date || '',
+    location_id: data.location?.id || '',
+    quantity: data.quantity ?? 1,
+    min_threshold: data.min_threshold ?? 1,
+  });
+}
   async function addNewLocation() {
     if (!newLocation.trim()) return;
     const familyId = getFamilyId();
