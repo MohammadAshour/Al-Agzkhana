@@ -76,30 +76,30 @@ function EditInventoryContent() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
-    const familyId = getFamilyId();
-    const payload = {
-      medicine_id: parseInt(form.medicine_id),
-      production_date: form.production_date,
-      open_date: form.open_date || null,
-      location_id: form.location_id ? parseInt(form.location_id) : null,
-      quantity: form.quantity,
-      min_threshold: form.min_threshold,
-      family_id: familyId,
-    };
-    const res = await fetch(`${API_URL}/api/instances/${id}/`, {
-      method: 'PUT',
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) {
-      router.push('/inventory');
-    } else {
-      const data = await res.json();
-      alert('خطأ في الحفظ: ' + JSON.stringify(data));
-      setLoading(false);
-    }
+  e.preventDefault();
+  setLoading(true);
+  const familyId = getFamilyId();
+  const payload = {
+    medicine_id: parseInt(form.medicine_id),
+    production_date: form.production_date,
+    open_date: form.open_date || null,
+    location_id: form.location_id ? parseInt(form.location_id) : null,
+    quantity: form.quantity,
+    min_threshold: form.min_threshold,
+    family_id: familyId,
+  };
+  const res = await fetch(`${API_URL}/api/instances/${id}/?family_id=${familyId}`, {
+    method: 'PUT',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (res.ok) {
+    router.push('/inventory');
+  } else {
+    const data = await res.json();
+    alert('خطأ في الحفظ: ' + JSON.stringify(data));
+    setLoading(false);
+  }
 }
 
   return (
