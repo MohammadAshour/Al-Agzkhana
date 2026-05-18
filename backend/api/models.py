@@ -177,7 +177,7 @@ class MedicineInstance(models.Model):
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name='instances', null=True)
     quantity = models.PositiveIntegerField(default=1)
-    min_threshold = models.PositiveIntegerField(default=1)
+    min_threshold = models.PositiveIntegerField(default=0)
 
     @property
     def expiry_date(self):
