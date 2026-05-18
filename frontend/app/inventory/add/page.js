@@ -20,7 +20,7 @@ function AddInventoryContent() {
     open_date: '',
     location_id: '',
     quantity: 1,
-    min_threshold: 1,
+    min_threshold: 0,
   });
 
   useEffect(() => {

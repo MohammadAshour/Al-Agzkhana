@@ -21,7 +21,7 @@ function EditInventoryContent() {
     open_date: '',
     location_id: '',
     quantity: 1,
-    min_threshold: 1,
+    min_threshold: 0,
   });
 
   useEffect(() => {
@@ -56,7 +56,7 @@ function EditInventoryContent() {
     open_date: data.open_date || '',
     location_id: data.location?.id || '',
     quantity: data.quantity ?? 1,
-    min_threshold: data.min_threshold ?? 1,
+    min_threshold: data.min_threshold ?? 0,
   });
 }
 
@@ -147,7 +147,7 @@ function EditInventoryContent() {
 
         <div>
           <label className="block text-sm font-medium mb-1">حد التنبيه (أقل كمية)</label>
-          <input type="number" min="1" value={form.min_threshold}
+          <input type="number" min="0" value={form.min_threshold}
             onChange={e => setForm({...form, min_threshold: parseInt(e.target.value)})}
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
